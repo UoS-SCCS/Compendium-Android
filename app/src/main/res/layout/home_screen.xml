@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HomeScreen">
+
+    <Button
+        android:id="@+id/button_enrol"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+
+        android:text="@string/enrol_btn_text"
+        android:textSize="24sp"
+        android:minWidth="300dp"
+        android:minHeight="80dp"
+        app:icon="@drawable/ic_arrow_right_to_bracket_solid"
+        app:iconGravity="start"
+        app:iconPadding="14dp"
+        app:iconSize="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="215dp"
+        android:layout_height="250dp"
+        android:src="@drawable/ic_owl_logo_nonstop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button_notifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="34dp"
+        android:minWidth="300dp"
+        android:minHeight="80dp"
+        android:text="@string/notifications_btn_text"
+        android:textSize="24sp"
+        app:icon="@drawable/ic_bell_solid"
+        app:iconGravity="start"
+        app:iconPadding="14dp"
+        app:iconSize="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_enrol" />
+
+    <Button
+        android:id="@+id/button_keymanager"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="34dp"
+        android:minWidth="300dp"
+        android:minHeight="80dp"
+        android:text="@string/key_manager_btn_text"
+        android:textSize="24sp"
+        app:icon="@drawable/ic_key_solid"
+        app:iconGravity="start"
+        app:iconPadding="14dp"
+        app:iconSize="24dp"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_notifications" />
+</androidx.constraintlayout.widget.ConstraintLayout>

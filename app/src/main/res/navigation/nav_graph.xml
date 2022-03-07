@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/HomeFragment">
+
+    <fragment
+        android:id="@+id/HomeFragment"
+        android:name="com.castellate.compendium.HomeScreen"
+        android:label="@string/app_name"
+        tools:layout="@layout/home_screen">
+        <action
+            android:id="@+id/action_HomeFragment_to_QRCodeFragment"
+            app:destination="@id/QRCodeFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_itemFragment"
+            app:destination="@id/itemFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/SecondFragment"
+        android:name="com.castellate.compendium.SecondFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_second">
+
+        <action
+            android:id="@+id/action_SecondFragment_to_FirstFragment"
+            app:destination="@id/HomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/QRCodeFragment"
+        android:name="com.castellate.compendium.QRCodeFragment"
+        android:label="@string/qr_code_title"
+        tools:layout="@layout/fragment_q_r_code" >
+        <action
+            android:id="@+id/action_QRCodeFragment_to_completeEnrolment"
+            app:destination="@id/completeEnrolment" />
+    </fragment>
+    <fragment
+        android:id="@+id/itemFragment"
+        android:name="com.castellate.compendium.ItemFragment"
+        android:label="fragment_notification_item_list"
+        tools:layout="@layout/fragment_notification_item_list" />
+    <fragment
+        android:id="@+id/completeEnrolment"
+        android:name="com.castellate.compendium.CompleteEnrolment"
+        android:label="Enrol Device"
+        tools:layout="@layout/fragment_complete_enrolment" >
+        <action
+            android:id="@+id/action_completeEnrolment_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
+    </fragment>
+</navigation>

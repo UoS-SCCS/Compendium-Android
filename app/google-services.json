@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "658929455078",
+    "project_id": "compendium-sccs",
+    "storage_bucket": "compendium-sccs.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658929455078:android:535e5d07dd287994149027",
+        "android_client_info": {
+          "package_name": "com.castellate.compendium"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "658929455078-eh7bqqnpcp0hrot9d6vci7rpdch5ugau.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNBZnsna43wqGnKSvzAR0umkmvi2v2PsA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "658929455078-eh7bqqnpcp0hrot9d6vci7rpdch5ugau.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

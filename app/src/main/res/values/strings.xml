@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">Compendium</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="fcm_message">Compendium Request</string>
+    <string name="default_notification_channel_id" translatable="false">credential_access</string>
+    <string name="default_notification_channel_name" translatable="false">Credential Access Requests</string>
+    <string name="msg_token_fmt" translatable="false">FCM registration Token: %s</string>
+    <string name="title_activity_compendium_request">CompendiumRequestActivity</string>
+
+    <string name="connecting_label">Connecting...</string>
+    <string name="enrol_btn_text">Enrol</string>
+    <string name="enrol_request_text">Enrolment Request</string>
+    <string name="enrol_explain">Please confirm you want to enrol with the following PC:</string>
+    <string name="device_name_lbl">Device Name:</string>
+    <string name="confirm_btn">Confirm</string>
+    <string name="loading_text">Loading...</string>
+    <string name="notifications_btn_text">Notifications</string>
+    <string name="key_manager_btn_text">Key Manager</string>
+    <string name="qr_code_title">Scan to Enrol</string>
+    <string name="finish_btn">Finish</string>
+    <string name="app_title">Compendium</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>
