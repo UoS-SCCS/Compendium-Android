@@ -16,7 +16,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/sccsColour"
             app:popupTheme="@style/Theme.Compendium.PopupOverlay"
             app:title="Compendium Request"
             app:titleTextColor="@android:color/primary_text_light" />

@@ -3,6 +3,8 @@ package com.castellate.compendium.protocol.enrol;
 import com.castellate.compendium.protocol.messages.EmbeddedEncryptedMessage;
 import com.castellate.compendium.protocol.messages.ProtocolMessage;
 
+import java.util.Map;
+
 public class ConfirmKeyProtocolMessage extends ProtocolMessage implements EmbeddedEncryptedMessage {
 
     public ConfirmKeyProtocolMessage(){
@@ -11,7 +13,7 @@ public class ConfirmKeyProtocolMessage extends ProtocolMessage implements Embedd
 
 
     @Override
-    public Class<?> getClassObj() {
+    public Class<?> getClassObj(Map<String,String> protocolData) {
         return ConfirmKeyProtocolMessage.class;
     }
 

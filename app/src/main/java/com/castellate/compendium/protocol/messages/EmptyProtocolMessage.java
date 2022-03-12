@@ -5,11 +5,19 @@ import com.castellate.compendium.protocol.enrol.InitKeyReqProtocolMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Map;
+
 public class EmptyProtocolMessage extends ProtocolMessage {
 
     public EmptyProtocolMessage(){
         super();
     }
+
+    @Override
+    public String getWebSocketMsg(Map<String, String> protocolData) {
+        return null;
+    }
+
     @Override
     public boolean parse(String data)  {
         try {
@@ -20,7 +28,7 @@ public class EmptyProtocolMessage extends ProtocolMessage {
     }
 
     @Override
-    public Class<?> getClassObj() {
+    public Class<?> getClassObj(Map<String,String> protocolData) {
         return InitKeyReqProtocolMessage.class;
     }
 

@@ -19,6 +19,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.util.Log;
@@ -171,6 +172,7 @@ public class CompendiumFirebaseNotificationService extends FirebaseMessagingServ
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(R.drawable.ic_stat_ic_notification)
+                        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.owllogo ))
                         .setContentTitle(getString(R.string.fcm_message))
                         .setContentText(messageString)
                         .setAutoCancel(true)

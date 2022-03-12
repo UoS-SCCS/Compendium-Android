@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/First2Fragment"
         android:name="com.castellate.compendium.ConnectFragment"
-        android:label="@string/first_fragment_label"
+        android:label="@string/connect_fragment_title"
         tools:layout="@layout/connect_fragment">
 
         <action

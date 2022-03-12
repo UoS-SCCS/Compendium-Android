@@ -21,12 +21,14 @@
     <string name="enrol_explain">Please confirm you want to enrol with the following PC:</string>
     <string name="device_name_lbl">Device Name:</string>
     <string name="confirm_btn">Confirm</string>
+    <string name="cancel_btn">Cancel</string>
     <string name="loading_text">Loading...</string>
     <string name="notifications_btn_text">Notifications</string>
     <string name="key_manager_btn_text">Key Manager</string>
     <string name="qr_code_title">Scan to Enrol</string>
     <string name="finish_btn">Finish</string>
     <string name="app_title">Compendium</string>
+    <string name="connect_fragment_title">Compendium Request</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

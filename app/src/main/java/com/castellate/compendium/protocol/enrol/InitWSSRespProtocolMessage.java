@@ -15,7 +15,7 @@ public class InitWSSRespProtocolMessage extends ProtocolMessage implements Store
     }
 
     @Override
-    public Class<?> getClassObj() {
+    public Class<?> getClassObj(Map<String,String> protocolData) {
         return InitWSSRespProtocolMessage.class;
     }
 

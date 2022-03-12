@@ -27,6 +27,7 @@ public class CompanionDevice {
     private Protocol currentProtocol = null;
     private String id;
     private Queue<String> bufferedQueue = new ConcurrentLinkedQueue();
+
     public CompanionDevice(String companionId) {
         id = companionId;
     }
@@ -37,66 +38,105 @@ public class CompanionDevice {
         }
         protocol.putInProtocolData(ID_CD, id);
         currentProtocol = protocol;
-        if(currentProtocol.getStatus() == READY_TO_SEND){
+        if (currentProtocol.getStatus() == READY_TO_SEND) {
             bufferedQueue.add(currentProtocol.getNextMessage());
-        }else if(currentProtocol.getStatus() == Protocol.STATUS.AWAITING_UI){
+        } else if (currentProtocol.getStatus() == Protocol.STATUS.AWAITING_UI) {
 
         }
         initWebSocketClient();
     }
-    private void sendWSSMessage(String message){
-        if(!mWebSocketClient.isOpen()){
-            Log.d(TAG,"Queuing message:" + message);
+
+    private void sendWSSMessage(String message) {
+        if (message == null) {
+            Log.d(TAG, "Null send message, assume dummy, will ignore");
+            return;
+        }
+        if (!mWebSocketClient.isOpen()) {
+            Log.d(TAG, "Queuing message:" + message);
             bufferedQueue.add(message);
-        }else{
+        } else {
             clearQueue();
-            Log.d(TAG,"Sending message direct:" + message);
+            Log.d(TAG, "Sending message direct:" + message);
             mWebSocketClient.send(message);
         }
     }
-    public int getProgress(){
-        if(currentProtocol==null){
+
+    public int getProgress() {
+        if (currentProtocol == null) {
             return 0;
         }
         return currentProtocol.getProgress();
     }
-    private synchronized void clearQueue(){
+
+    private synchronized void clearQueue() {
         String msgToSend = null;
-        Log.d(TAG,"Clearing Queue");
-        while((msgToSend= bufferedQueue.poll())!=null){
-            Log.d(TAG,"Sending queued message:" + msgToSend);
+        Log.d(TAG, "Clearing Queue");
+        while ((msgToSend = bufferedQueue.poll()) != null) {
+            Log.d(TAG, "Sending queued message:" + msgToSend);
             mWebSocketClient.send(msgToSend);
         }
     }
-    public String getCurrentStateOfProtocol(){
-        if(currentProtocol!=null){
+
+    public String getCurrentStateOfProtocol() {
+        if (currentProtocol != null) {
             return currentProtocol.getProtocolStateString();
-        }else{
+        } else {
             return "Null";
         }
     }
-    public void updateFromUI(Map<String,String>newData){
-        if(newData!=null){
+
+    public void putInProtocolData(String key, String value) {
+        if (currentProtocol != null) {
+            currentProtocol.putInProtocolData(key, value);
+        }
+
+    }
+
+    public void updateFromUI() {
+        updateFromUI(null);
+    }
+    public void reset(){
+        Log.d(TAG,"Resetting Companion Device");
+        if(this.currentProtocol!=null) {
+            this.currentProtocol.cleanUp();
+            this.currentProtocol = null;
+        }
+
+        bufferedQueue.clear();
+        if(this.mWebSocketClient.isOpen()){
+            Log.d(TAG,"WebSocket Client is still open will try to close");
+            if(!this.mWebSocketClient.isClosing()) {
+                this.mWebSocketClient.close();
+            }
+        }
+        if(this.mWebSocketClient.isClosed()){
+            Log.d(TAG,"WebSocket Client is Closed");
+        }
+
+    }
+    public void updateFromUI(Map<String, String> newData) {
+        if (newData != null) {
             currentProtocol.putAllInProtocolData(newData);
         }
         currentProtocol.receivedUI();
         try {
             currentProtocol.prepareNextMessage();
-            if(currentProtocol.getStatus()==READY_TO_SEND){
+            if (currentProtocol.getStatus() == READY_TO_SEND) {
                 sendWSSMessage(currentProtocol.getNextMessage());
 
                 currentProtocol.messageSent();
-                if(currentProtocol.getStatus() == Protocol.STATUS.FINISHED){
-                    Log.d(TAG,"Calling Close From Finished UI");
+                if (currentProtocol.getStatus() == Protocol.STATUS.FINISHED) {
+                    Log.d(TAG, "Calling Close From Finished UI");
                     mWebSocketClient.close();
                 }
             }
 
 
-        }catch (ProtocolMessageException e){
-            Log.e(TAG,"Exception preparing message",e);
+        } catch (ProtocolMessageException e) {
+            Log.e(TAG, "Exception preparing message", e);
         }
     }
+
     public void processMessage(JSONObject msg) {
         if (currentProtocol == null || msg == null) {
             return;
@@ -107,39 +147,43 @@ public class CompanionDevice {
                 sendWSSMessage(currentProtocol.getNextMessage());
 
                 currentProtocol.messageSent();
-                if(currentProtocol.getStatus() == Protocol.STATUS.FINISHED){
-                    Log.d(TAG,"Calling Close");
+                if (currentProtocol.getStatus() == Protocol.STATUS.FINISHED) {
+                    Log.d(TAG, "Calling Close");
                     mWebSocketClient.close();
                 }
                 break;
             case AWAITING_UI:
-                Log.d(TAG,"Awaiting UI");
+                Log.d(TAG, "Awaiting UI");
                 break;
             case AWAITING_RESPONSE:
-                Log.d(TAG,"Awaiting response");
+                Log.d(TAG, "Awaiting response");
                 break;
             case IDLE:
                 break;
         }
 
     }
-    public String getProtocolData(String field){
-        if(currentProtocol!=null){
+
+    public String getProtocolData(String field) {
+        if (currentProtocol != null) {
             return currentProtocol.getProtocolData(field);
-        }else{
+        } else {
             return "";
         }
     }
+
     public void processMessage(String msg) {
         if (currentProtocol != null) {
             currentProtocol.parseIncomingMessage(msg);
         }
     }
-    public void setProtocolViewModel(ProtocolViewModel model){
+
+    public void setProtocolViewModel(ProtocolViewModel model) {
         if (currentProtocol != null) {
             currentProtocol.setProtocolViewModel(model);
         }
     }
+
     public void initWebSocketClient() {
         URI uri;
         try {

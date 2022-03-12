@@ -14,7 +14,7 @@ public class ConfirmKeyEncryptedSubMessage extends ProtocolMessage implements Ve
     }
 
     @Override
-    public Class<?> getClassObj() {
+    public Class<?> getClassObj(Map<String,String> protocolData) {
         return ConfirmKeyEncryptedSubMessage.class;
     }
 

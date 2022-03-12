@@ -17,7 +17,7 @@ public class EnrolKeyRespProtocolMessage extends InitKeyRespProtocolMessage impl
     }
 
     @Override
-    public Class<?> getClassObj() {
+    public Class<?> getClassObj(Map<String,String> protocolData) {
         return EnrolKeyRespProtocolMessage.class;
     }
 

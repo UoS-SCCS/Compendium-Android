@@ -46,6 +46,14 @@ public class EnrolProtocol extends Protocol {
         return protoMessage.processMessage(this.protocolData);
     }
 
+    @Override
+    public boolean isFinished() {
+        if(state == STATE.FINISHED){
+            return true;
+        }
+        return false;
+    }
+
 
 
     @Override

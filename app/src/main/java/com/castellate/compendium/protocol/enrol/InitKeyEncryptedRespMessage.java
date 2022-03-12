@@ -12,6 +12,8 @@ import com.castellate.compendium.protocol.messages.SignMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Map;
+
 public class InitKeyEncryptedRespMessage extends ProtocolMessage implements LoadProtocolData, SignMessage {
 
     public InitKeyEncryptedRespMessage(){
@@ -27,7 +29,7 @@ public class InitKeyEncryptedRespMessage extends ProtocolMessage implements Load
     }
 
     @Override
-    public Class<?> getClassObj() {
+    public Class<?> getClassObj(Map<String,String> protocolData) {
         return InitKeyEncryptedRespMessage.class;
     }
 

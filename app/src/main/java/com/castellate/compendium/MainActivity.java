@@ -19,16 +19,20 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.castellate.compendium.crypto.CompanionKeyManager;
+import com.castellate.compendium.data.IdentityStore;
 import com.castellate.compendium.data.PushServerManager;
+import com.castellate.compendium.data.StorageException;
 import com.castellate.compendium.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
     private static final String TAG = "MainActivity";
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final int CAMERA_REQUEST_CODE = 10;
+    private AppBarConfiguration appBarConfiguration;
+    private ActivityMainBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,18 +41,28 @@ public class MainActivity extends AppCompatActivity {
             // Create channel to show notifications.
             String channelId = getString(R.string.default_notification_channel_id);
             String channelName = getString(R.string.default_notification_channel_name);
-            NotificationManager notificationManager =
-                    getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(new NotificationChannel(channelId,
-                    channelName, NotificationManager.IMPORTANCE_HIGH));
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH));
+        }
+
+        CompanionKeyManager ckm = new CompanionKeyManager();
+        Log.d(TAG,"Keys:" + ckm.getKeyList());
+        ckm.testAddKey();
+        Log.d(TAG,"Keys1:" + ckm.getKeyList());
+        ckm.testDelKey();
+        Log.d(TAG,"Keys2:" + ckm.getKeyList());
+        IdentityStore identityStore = IdentityStore.getInstance();
+        try {
+            identityStore.init(getFilesDir());
+        } catch (StorageException e) {
+            e.printStackTrace();
         }
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.toolbar);
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment_content_main);
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_main);
         NavController navController = navHostFragment.getNavController();
         //NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
@@ -71,31 +85,31 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         PushServerManager.checkRegistered(getApplicationContext());
-        if(hasCameraPermission()){
+        if (hasCameraPermission()) {
             //
-        }else{
+        } else {
             this.requestPermission();
         }
 
         /**
          * This shouldn't be needed because the notification service will receive the token
          * refresh call and we can update from there.
-         FirebaseMessaging.getInstance().getToken()
-         .addOnCompleteListener(new OnCompleteListener<String>() {
-        @Override public void onComplete(@NonNull Task<String> task) {
-        if (!task.isSuccessful()) {
-        Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-        return;
-        }
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+            @Override
+            public void onComplete(@NonNull Task<String> task) {
+                if (!task.isSuccessful()) {
+                    Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                    return;
+                }
 
-        // Get new FCM registration token
-        String token = task.getResult();
+                // Get new FCM registration token
+                String token = task.getResult();
 
-        // Log and toast
-        String msg = getString(R.string.msg_token_fmt, token);
-        Log.d(TAG, msg);
-        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
-        }
+                // Log and toast
+                String msg = getString(R.string.msg_token_fmt, token);
+                Log.d(TAG, msg);
+                //Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+            }
         });*/
     }
 
@@ -124,21 +138,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
+        return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp();
     }
 
     private boolean hasCameraPermission() {
-        return ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
+
     private void requestPermission() {
-        ActivityCompat.requestPermissions(
-                this,
-                CAMERA_PERMISSION,
-                CAMERA_REQUEST_CODE
+        ActivityCompat.requestPermissions(this, CAMERA_PERMISSION, CAMERA_REQUEST_CODE
 
         );
     }

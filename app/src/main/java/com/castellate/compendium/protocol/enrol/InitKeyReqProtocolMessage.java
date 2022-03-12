@@ -21,7 +21,7 @@ public class InitKeyReqProtocolMessage extends ProtocolMessage implements StoreP
     }
 
     @Override
-    public Class<?> getClassObj() {
+    public Class<?> getClassObj(Map<String,String> protocolData) {
         return InitKeyReqProtocolMessage.class;
     }
 

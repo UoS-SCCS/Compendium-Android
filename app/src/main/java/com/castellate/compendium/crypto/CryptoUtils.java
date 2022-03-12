@@ -6,6 +6,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
@@ -19,6 +20,26 @@ public class CryptoUtils {
     private static final String PEM_HEAD = "-----BEGIN PUBLIC KEY-----";
     private static final String PEM_TAIL = "-----END PUBLIC KEY-----";
 
+    public static String getPublicKeyId(PublicKey publicKey) throws CryptoException {
+        byte[] derKey = publicKey.getEncoded();
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new CryptoException("Exception converting key to hex id",e);
+        }
+        digest.update(publicKey.getEncoded());
+        return convertToHex(digest.digest());
+    }
+
+    public static String convertToHex(byte[] bytes){
+        StringBuffer buffer = new StringBuffer();
+        for(int i=0; i < bytes.length; i++){
+            buffer.append(Character.forDigit((bytes[i] >> 4) & 0xF, 16));
+            buffer.append(Character.forDigit((bytes[i] & 0xF), 16));
+        }
+        return buffer.toString();
+    }
     public static ECPublicKey getPublicKey(String encodedKey) throws CryptoException {
         try {
             String derKey = encodedKey;

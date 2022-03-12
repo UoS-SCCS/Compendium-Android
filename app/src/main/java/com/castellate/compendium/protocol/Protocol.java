@@ -40,6 +40,8 @@ public abstract class Protocol {
     protected ProtocolViewModel model;
     public abstract Class[] getMessages();
     public abstract int getStateOrdinal();
+    public abstract boolean isFinished();
+
     public abstract String getProtocolStateString();
     public abstract boolean processIncomingMessage(ProtocolMessage protoMessage);
     protected STATUS status = STATUS.IDLE;
@@ -75,6 +77,10 @@ public abstract class Protocol {
             return shareStatus(status);
         }
         if(advancedStateTriggerUI()){
+            if(isFinished()){
+                status = STATUS.FINISHED;
+                return shareStatus(status);
+            }
             status = STATUS.AWAITING_UI;
             return shareStatus(status);
         }else if(getStateOrdinal()==0){
@@ -106,6 +112,15 @@ public abstract class Protocol {
         }
 
     }
+    public void cleanUp(){
+        this.protocolData.clear();
+        if(this.model!=null){
+            this.model.postProtocolStatus(STATUS.IDLE);
+        }
+        this.model=null;
+
+    }
+
     public String getProtocolData(String field){
         return protocolData.get(field);
     }
@@ -139,6 +154,9 @@ public abstract class Protocol {
     public void receivedUI(){
         status = STATUS.READY_TO_SEND;
     }
+
+
+
     public void putAllInProtocolData(Map<String,String> data){
         Iterator<String> itr = data.keySet().iterator();
         while(itr.hasNext()){

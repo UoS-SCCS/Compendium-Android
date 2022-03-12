@@ -12,7 +12,7 @@ public class InitWSSProtocolMessage extends ProtocolMessage {
     }
 
     @Override
-    public Class<?> getClassObj() {
+    public Class<?> getClassObj(Map<String,String> protocolData) {
         return InitWSSProtocolMessage.class;
     }
 

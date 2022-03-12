@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.transition.TransitionInflater;
 
 import com.castellate.compendium.protocol.enrol.InitKeyReqProtocolMessage;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -84,6 +85,9 @@ public class QRCodeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TransitionInflater inflater = TransitionInflater.from(requireContext());
+        setExitTransition(inflater.inflateTransition(R.transition.slide_left));
+        setEnterTransition(inflater.inflateTransition(R.transition.slide_right));
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);

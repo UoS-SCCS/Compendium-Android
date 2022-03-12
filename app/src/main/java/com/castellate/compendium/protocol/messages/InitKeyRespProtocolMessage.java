@@ -2,6 +2,8 @@ package com.castellate.compendium.protocol.messages;
 
 import org.json.JSONObject;
 
+import java.util.Map;
+
 public abstract class  InitKeyRespProtocolMessage extends ProtocolMessage implements EmbeddedEncryptedMessage,LoadProtocolData {
 
     public InitKeyRespProtocolMessage(){
@@ -9,7 +11,7 @@ public abstract class  InitKeyRespProtocolMessage extends ProtocolMessage implem
     }
 
     @Override
-    public Class<?> getClassObj() {
+    public Class<?> getClassObj(Map<String,String> protocolData) {
         return InitKeyRespProtocolMessage.class;
     }
 

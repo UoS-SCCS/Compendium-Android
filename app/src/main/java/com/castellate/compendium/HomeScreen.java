@@ -1,24 +1,30 @@
 package com.castellate.compendium;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.transition.TransitionInflater;
 
 import com.castellate.compendium.databinding.HomeScreenBinding;
 
 public class HomeScreen extends Fragment {
 
     private HomeScreenBinding binding;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        TransitionInflater inflater = TransitionInflater.from(requireContext());
+        setExitTransition(inflater.inflateTransition(R.transition.slide_left));
+        setEnterTransition(inflater.inflateTransition(R.transition.slide_right));
+
+    }
 
     @Override
     public View onCreateView(

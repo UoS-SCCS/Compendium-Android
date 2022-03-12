@@ -37,7 +37,7 @@ public abstract class ProtocolMessage {
     private static final String TAG = "ProtocolMessage";
     protected JSONObject msgData =new JSONObject();
 
-    public abstract Class<?> getClassObj();
+    public abstract Class<?> getClassObj(Map<String,String> protocolData);
     public abstract String[] getAllFields();
 
 
@@ -46,14 +46,16 @@ public abstract class ProtocolMessage {
     }
 
     public boolean processMessage(Map<String, String> protocolData) {
-        if (VerifySignature.class.isAssignableFrom(getClassObj())) {
+        if (VerifySignature.class.isAssignableFrom(getClassObj(protocolData))) {
             VerifySignature verifySig = (VerifySignature) this;
+            verifySig.getPublicKey(protocolData);
             boolean verified = this.verifySignature(verifySig.getSignature(), verifySig.getPublicKey(protocolData), verifySig.getSignatureFields(), protocolData);
             if (!verified) {
+                Log.d(TAG,"Signature verification failed");
                 return false;
             }
         }
-        if (StoreProtocolData.class.isAssignableFrom(getClassObj())) {
+        if (StoreProtocolData.class.isAssignableFrom(getClassObj(protocolData))) {
             addToProtocolData(protocolData, ((StoreProtocolData) this).getStoreFields());
         }
 
@@ -61,7 +63,7 @@ public abstract class ProtocolMessage {
     }
 
     public boolean processSubMessages(Map<String, String> protocolData) {
-        if (EmbeddedEncryptedMessage.class.isAssignableFrom(getClassObj())) {
+        if (EmbeddedEncryptedMessage.class.isAssignableFrom(getClassObj(protocolData))) {
             EmbeddedEncryptedMessage embedded = ((EmbeddedEncryptedMessage) this);
             ProtocolMessage subMessage = null;
             try {
@@ -78,10 +80,11 @@ public abstract class ProtocolMessage {
     }
 
     public boolean prepareOutgoingMessage(Map<String, String> protocolData) throws ProtocolMessageException {
-        if (LoadProtocolData.class.isAssignableFrom(getClassObj())) {
+        getClassObj(protocolData);
+        if (LoadProtocolData.class.isAssignableFrom(getClassObj(protocolData))) {
             addFromProtocolData(protocolData, ((LoadProtocolData) this).getLoadFields());
         }
-        if (EmbeddedEncryptedMessage.class.isAssignableFrom(getClassObj())) {
+        if (EmbeddedEncryptedMessage.class.isAssignableFrom(getClassObj(protocolData))) {
             EmbeddedEncryptedMessage embedded = (EmbeddedEncryptedMessage) this;
             ProtocolMessage protoMessage = null;
             try {
@@ -94,7 +97,7 @@ public abstract class ProtocolMessage {
 
         }
 
-        if (SignMessage.class.isAssignableFrom(getClassObj())) {
+        if (SignMessage.class.isAssignableFrom(getClassObj(protocolData))) {
             signMessage(((SignMessage) this).getSignatureField(), ((SignMessage) this).getSignatureFields(), protocolData);
         }
 

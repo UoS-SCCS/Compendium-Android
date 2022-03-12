@@ -5,7 +5,58 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CompleteEnrolment">
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_spinner"
+        app:indicatorColor="@color/sccsColour"
+        app:trackColor="@color/design_default_color_secondary"
+        app:indicatorSize="150dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:trackThickness="10dp"
 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+
+    <TextView
+        android:id="@+id/progress_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/loading_text"
+        android:layout_marginTop="12dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progress_spinner"  />
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/network_progress"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/progress_spinner"
+        app:layout_constraintLeft_toLeftOf="@id/progress_spinner"
+        app:layout_constraintRight_toRightOf="@id/progress_spinner"
+        app:layout_constraintTop_toTopOf="@id/progress_spinner"
+        android:src="@drawable/loader"
+        />
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/complete"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/progress_spinner"
+        app:layout_constraintLeft_toLeftOf="@id/progress_spinner"
+        app:layout_constraintRight_toRightOf="@id/progress_spinner"
+        app:layout_constraintTop_toTopOf="@id/progress_spinner"
+        android:src="@drawable/tick_animation"
+        />
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
@@ -16,7 +67,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/progress_spinner" />
 
     <TextView
         android:id="@+id/explain"
@@ -63,60 +114,32 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="@string/confirm_btn"
+        android:backgroundTint="@color/sccsColour"
+        app:icon="@drawable/ic_circle_check_solid"
+        app:iconGravity="start"
+        app:iconPadding="10dp"
+        app:iconSize="18dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/cancel_enrolment"
         app:layout_constraintTop_toBottomOf="@+id/label_layout"/>
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progress_spinner"
-        app:indicatorColor="@color/design_default_color_primary"
-        app:trackColor="@color/design_default_color_secondary"
-        app:indicatorSize="150dp"
-        android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:trackThickness="8dp"
-        android:visibility="invisible"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/confirm_button"
-        />
 
-
-    <TextView
-        android:id="@+id/progress_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/loading_text"
-        android:layout_marginTop="12dp"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progress_spinner"  />
 
     <Button
-        android:id="@+id/finish"
+        android:id="@+id/cancel_enrolment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/finish_btn"
+        android:text="@string/cancel_btn"
         android:layout_marginTop="24dp"
-        android:enabled="false"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:backgroundTint="@color/sccsColour"
+        app:icon="@drawable/ic_circle_xmark_solid"
+        app:iconGravity="start"
+        app:iconPadding="10dp"
+        app:iconSize="18dp"
+        app:layout_constraintEnd_toStartOf="@+id/confirm_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progress_status" />
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/network_progress"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="invisible"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        app:trackThickness="8dp"
-        app:layout_constraintBottom_toBottomOf="@id/progress_spinner"
-        app:layout_constraintLeft_toLeftOf="@id/progress_spinner"
-        app:layout_constraintRight_toRightOf="@id/progress_spinner"
-        app:layout_constraintTop_toTopOf="@id/progress_spinner"
-        android:indeterminate="true" />
+        app:layout_constraintTop_toBottomOf="@+id/label_layout" />
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

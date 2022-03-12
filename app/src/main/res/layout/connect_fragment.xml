@@ -1,43 +1,117 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ConnectFragment">
+    tools:context=".CompleteEnrolment">
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+
+        android:id="@+id/progress_spinner_req"
+        app:indicatorColor="@color/sccsColour"
+        app:trackColor="@color/design_default_color_secondary"
+        app:indicatorSize="150dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:trackThickness="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+
+        />
+
+    <pl.droidsonroids.gif.GifImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        app:layout_constraintBottom_toBottomOf="@id/progress_spinner_req"
+        app:layout_constraintLeft_toLeftOf="@id/progress_spinner_req"
+        app:layout_constraintRight_toRightOf="@id/progress_spinner_req"
+        app:layout_constraintTop_toTopOf="@id/progress_spinner_req"
+        android:src="@drawable/loader"
+        />
+    <TextView
+        android:id="@+id/progress_status_req"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/loading_text"
+        android:layout_marginTop="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progress_spinner_req"  />
+
 
     <TextView
-        android:id="@+id/connect_progress_text"
+        android:id="@+id/device_details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/connecting_label"
-        app:layout_constraintBottom_toTopOf="@id/button_enrol1"
+        android:layout_marginTop="16dp"
+        android:maxWidth="300dp"
+        android:text=""
+        android:textAlignment="center"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/progress_status_req" />
 
+    <TextView
+        android:id="@+id/reason_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:maxWidth="300dp"
+        android:text=""
+        android:textAlignment="center"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/device_details" />
+
+    <TextView
+        android:id="@+id/code_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:maxWidth="300dp"
+        android:text=""
+        android:textAlignment="center"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reason_details" />
+
+    <TextView
+        android:id="@+id/instructions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:maxWidth="300dp"
+        android:text=""
+        android:textAlignment="center"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/code_details" />
     <Button
-        android:id="@+id/button_enrol1"
+        android:id="@+id/cancel_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/next"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="@color/sccsColour"
+        android:visibility="invisible"
+        android:text="@string/cancel_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/connect_progress_text" />
+        app:layout_constraintTop_toBottomOf="@+id/instructions"/>
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="190dp"
-        android:layout_height="190dp"
-        android:layout_marginTop="37dp"
-        android:layout_marginBottom="136dp"
-        android:indeterminate="false"
-        android:max="100"
-        app:layout_constraintBottom_toTopOf="@+id/connect_progress_text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.19999999" />
+
+
+
+
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+

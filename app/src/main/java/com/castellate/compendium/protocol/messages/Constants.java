@@ -8,5 +8,8 @@ public class Constants {
     public static final String ID_CD = "id_cd";
     public static final String CD_PUBLIC_KEY = "cd_public_key";
     public static final String DERIVED_KEY = "derived_key";
+    public static final String HASH_CD_PUBLIC_KEY = "hash_cd_public_key";
+    public static final String HASH_PC_PUBLIC_KEY = "hash_pc_public_key";
+
 
 }
