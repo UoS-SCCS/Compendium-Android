@@ -1,14 +1,14 @@
 package com.castellate.compendium;
 
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.castellate.compendium.placeholder.PlaceholderContent.PlaceholderItem;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.castellate.compendium.databinding.FragmentNotificationItemBinding;
+import com.castellate.compendium.placeholder.PlaceholderContent.PlaceholderItem;
 
 import java.util.List;
 
@@ -24,8 +24,9 @@ public class NotificationListRecyclerViewAdapter extends RecyclerView.Adapter<No
         mValues = items;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         return new ViewHolder(FragmentNotificationItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
 
@@ -54,6 +55,7 @@ public class NotificationListRecyclerViewAdapter extends RecyclerView.Adapter<No
             mContentView = binding.content;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return super.toString() + " '" + mContentView.getText() + "'";

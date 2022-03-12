@@ -9,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public abstract class Protocol {
@@ -19,7 +18,7 @@ public abstract class Protocol {
             @Override
             public STATE next() {
                 return values()[0];
-            };
+            }
         };
         public STATE next() {
             // No bounds checking required here, because the last instance overrides
@@ -34,10 +33,10 @@ public abstract class Protocol {
         AWAITING_RESPONSE,
         FINISHED
     }
-    protected Map<String,String> protocolData = new HashMap<String,String>();
+    protected final Map<String,String> protocolData = new HashMap<>();
     protected ProtocolMessage nextMessage =null;
     protected ProtocolViewModel model;
-    public abstract Class[] getMessages();
+    public abstract Class<? extends ProtocolMessage>[] getMessages();
     public abstract int getStateOrdinal();
     public abstract boolean isFinished();
 
@@ -54,14 +53,10 @@ public abstract class Protocol {
         return status;
     }
     public STATUS parseIncomingMessage(JSONObject msg) {
-        ProtocolMessage protoMessage = null;
+        ProtocolMessage protoMessage;
         try {
             protoMessage = (ProtocolMessage) getMessages()[getStateOrdinal()].newInstance();
-            if(protoMessage == null){
-                status = STATUS.AWAITING_RESPONSE;
-                return shareStatus(status);
 
-            }
         } catch (IllegalAccessException | InstantiationException e) {
             status = STATUS.ERROR;
             return shareStatus(status);
@@ -163,14 +158,12 @@ public abstract class Protocol {
 
 
     public void putAllInProtocolData(Map<String,String> data){
-        Iterator<String> itr = data.keySet().iterator();
-        while(itr.hasNext()){
-            String key = itr.next();
-            protocolData.put(key,data.get(key));
+        for (String key : data.keySet()) {
+            protocolData.put(key, data.get(key));
         }
     }
     public void prepareNextMessage() throws ProtocolMessageException {
-        ProtocolMessage protoMessage = null;
+        ProtocolMessage protoMessage;
         try {
             protoMessage = (ProtocolMessage) getMessages()[getStateOrdinal()].newInstance();
         } catch (IllegalAccessException  | InstantiationException e) {

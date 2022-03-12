@@ -15,7 +15,7 @@ public class EnrolProtocol extends Protocol {
             @Override
             public STATE next() {
                 return values()[0];
-            };
+            }
         };
         public STATE next() {
             // No bounds checking required here, because the last instance overrides
@@ -23,12 +23,12 @@ public class EnrolProtocol extends Protocol {
         }
     }
     private STATE state = STATE.INIT_KEY_REQ;
-    private static final Class[] MESSAGES = new Class[]{InitKeyReqProtocolMessage.class,InitWSSProtocolMessage.class,InitWSSRespProtocolMessage.class,EnrolKeyRespProtocolMessage.class,ConfirmKeyProtocolMessage.class};
+    private static final Class<? extends ProtocolMessage>[] MESSAGES = new Class[]{InitKeyReqProtocolMessage.class,InitWSSProtocolMessage.class,InitWSSRespProtocolMessage.class,EnrolKeyRespProtocolMessage.class,ConfirmKeyProtocolMessage.class};
     public EnrolProtocol(){
         super();
     }
     @Override
-    public Class[] getMessages() {
+    public Class<? extends ProtocolMessage>[] getMessages() {
         return EnrolProtocol.MESSAGES;
     }
     @Override
@@ -49,10 +49,7 @@ public class EnrolProtocol extends Protocol {
 
     @Override
     public boolean isFinished() {
-        if(state == STATE.FINISHED){
-            return true;
-        }
-        return false;
+        return state == STATE.FINISHED;
     }
 
 
@@ -63,11 +60,7 @@ public class EnrolProtocol extends Protocol {
         if(model!=null){
             model.postProtocolState(state.name());
         }
-        if(state == STATE.INIT_WSS || state == STATE.FINISHED){
-            return true;
-        }else{
-            return false;
-        }
+        return state == STATE.INIT_WSS || state == STATE.FINISHED;
     }
 
     @Override

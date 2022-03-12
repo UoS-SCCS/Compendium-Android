@@ -41,10 +41,7 @@ public class EnrolKeyRespProtocolMessage extends InitKeyRespProtocolMessage impl
         }catch(CryptoException e){
             throw new ProtocolMessageException("Exception processing key exchange",e);
         }
-        if(!super.prepareOutgoingMessage(protocolData)){
-            return false;
-        }
-        return true;
+        return super.prepareOutgoingMessage(protocolData);
     }
 
 

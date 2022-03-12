@@ -61,7 +61,6 @@ captures/
 .externalNativeBuild
 .cxx/
 .cxx
-local.properties
 /build
 /captures
 # Google Services (e.g. APIs or Firebase)

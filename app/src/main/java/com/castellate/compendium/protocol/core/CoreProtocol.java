@@ -24,7 +24,7 @@ public class CoreProtocol extends Protocol {
             @Override
             public STATE next() {
                 return values()[0];
-            };
+            }
         };
         public STATE next() {
             // No bounds checking required here, because the last instance overrides
@@ -32,12 +32,12 @@ public class CoreProtocol extends Protocol {
         }
     }
     private STATE state = STATE.INIT_KEY_REQ;
-    private static final Class[] MESSAGES = new Class[]{CoreKeyReqProtocolMessage.class, InitWSSProtocolMessage.class, InitWSSRespProtocolMessage.class, CoreKeyRespProtocolMessage.class, ConfirmKeyProtocolMessage.class, EmptyProtocolMessage.class,CoreRequestProtocolMessage.class, CoreResponseProtocolMessage.class};
+    private static final Class<ProtocolMessage>[] MESSAGES = new Class[]{CoreKeyReqProtocolMessage.class, InitWSSProtocolMessage.class, InitWSSRespProtocolMessage.class, CoreKeyRespProtocolMessage.class, ConfirmKeyProtocolMessage.class, EmptyProtocolMessage.class,CoreRequestProtocolMessage.class, CoreResponseProtocolMessage.class};
     public CoreProtocol(){
         super();
     }
     @Override
-    public Class[] getMessages() {
+    public Class<? extends ProtocolMessage>[] getMessages() {
         return CoreProtocol.MESSAGES;
     }
     @Override
@@ -47,10 +47,7 @@ public class CoreProtocol extends Protocol {
 
     @Override
     public boolean isFinished() {
-        if(state==STATE.FINISHED){
-            return true;
-        }
-        return false;
+        return state == STATE.FINISHED;
     }
 
     @Override
@@ -72,11 +69,7 @@ public class CoreProtocol extends Protocol {
         if(model!=null){
             model.postProtocolState(state.name());
         }
-        if(state == STATE.CORE_RESP || state == STATE.FINISHED){
-            return true;
-        }else{
-            return false;
-        }
+        return state == STATE.CORE_RESP || state == STATE.FINISHED;
     }
 
     @Override

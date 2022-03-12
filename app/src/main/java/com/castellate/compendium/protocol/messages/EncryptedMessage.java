@@ -10,7 +10,7 @@ import org.json.JSONObject;
 public class EncryptedMessage {
     public static final String IV = "iv";
     public static final String CIPHER_TEXT = "cipher_text";
-    private JSONObject data;
+    private final JSONObject data;
 
     public EncryptedMessage(JSONObject msgObj) throws ProtocolMessageException {
         Log.d("EncryptedJSONMessage", msgObj.toString());

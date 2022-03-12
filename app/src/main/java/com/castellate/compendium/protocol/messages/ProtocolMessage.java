@@ -24,6 +24,7 @@ import java.security.interfaces.ECPublicKey;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.crypto.BadPaddingException;
@@ -65,7 +66,7 @@ public abstract class ProtocolMessage {
     public boolean processSubMessages(Map<String, String> protocolData) throws ProtocolMessageException{
         if (EmbeddedEncryptedMessage.class.isAssignableFrom(getClassObj(protocolData))) {
             EmbeddedEncryptedMessage embedded = ((EmbeddedEncryptedMessage) this);
-            ProtocolMessage subMessage = null;
+            ProtocolMessage subMessage;
             try {
                 subMessage = decryptMessage(embedded.getEncryptedMsgField(), embedded.getEncryptedMessageClass(), protocolData);
             } catch (ProtocolMessageException e) {
@@ -86,7 +87,7 @@ public abstract class ProtocolMessage {
         }
         if (EmbeddedEncryptedMessage.class.isAssignableFrom(getClassObj(protocolData))) {
             EmbeddedEncryptedMessage embedded = (EmbeddedEncryptedMessage) this;
-            ProtocolMessage protoMessage = null;
+            ProtocolMessage protoMessage;
             try {
                 protoMessage = (ProtocolMessage) embedded.getEncryptedMessageClass().newInstance();
                 protoMessage.prepareOutgoingMessage(protocolData);
@@ -153,7 +154,7 @@ public abstract class ProtocolMessage {
     }
 
     protected boolean validate(String[] fields) {
-        Set<String> allFields = new HashSet<String>();
+        Set<String> allFields = new HashSet<>();
         for (String field : fields) {
             if (!msgData.has(field)) {
                 Log.d(TAG,"Missing field :" + field);
@@ -182,7 +183,7 @@ public abstract class ProtocolMessage {
                 if (msgData.has(field)) {
                     sig.update(msgData.getString(field).getBytes(StandardCharsets.UTF_8));
                 } else if (protocolData.containsKey(field)) {
-                    sig.update(protocolData.get(field).getBytes(StandardCharsets.UTF_8));
+                    sig.update(Objects.requireNonNull(protocolData.get(field)).getBytes(StandardCharsets.UTF_8));
                 }
             }
             return sig.verify(signatureBytes);
@@ -202,7 +203,7 @@ public abstract class ProtocolMessage {
                 if (msgData.has(field)) {
                     sig.update(msgData.getString(field).getBytes(StandardCharsets.UTF_8));
                 } else if (protocolData.containsKey(field)) {
-                    sig.update(protocolData.get(field).getBytes(StandardCharsets.UTF_8));
+                    sig.update(Objects.requireNonNull(protocolData.get(field)).getBytes(StandardCharsets.UTF_8));
                 }
             }
             byte[] sigBytes = sig.sign();

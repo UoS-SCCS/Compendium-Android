@@ -2,6 +2,7 @@ package com.castellate.compendium.ui.enrol;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,37 +18,31 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.transition.TransitionInflater;
 
+import com.castellate.compendium.CompanionDevice;
 import com.castellate.compendium.R;
 import com.castellate.compendium.data.IdentityStore;
 import com.castellate.compendium.exceptions.StorageException;
 import com.castellate.compendium.protocol.Protocol;
 import com.castellate.compendium.protocol.ProtocolException;
+import com.castellate.compendium.protocol.ProtocolViewModel;
 import com.castellate.compendium.protocol.enrol.EnrolProtocol;
 import com.castellate.compendium.protocol.messages.Constants;
-import com.castellate.compendium.CompanionDevice;
-import com.castellate.compendium.protocol.ProtocolViewModel;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
-import pl.droidsonroids.gif.AnimationListener;
+import java.util.Objects;
+
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link CompleteEnrolment#newInstance} factory method to
- * create an instance of this fragment.
+
  */
 public class CompleteEnrolment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
     private static final String TAG = "CompleteEnrolment";
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+
     private int newDeviceIdx = 1;
     private CompanionDevice companionDevice;
     private boolean inError =false;
@@ -56,35 +51,15 @@ public class CompleteEnrolment extends Fragment {
 
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CompleteEnrolment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CompleteEnrolment newInstance(String param1, String param2) {
-        CompleteEnrolment fragment = new CompleteEnrolment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
         TransitionInflater inflater = TransitionInflater.from(requireContext());
         setExitTransition(inflater.inflateTransition(R.transition.slide_left));
         setEnterTransition(inflater.inflateTransition(R.transition.slide_right));
-        SharedPreferences prefs = getContext().getSharedPreferences("AppSettings", getContext().MODE_PRIVATE);
+        SharedPreferences prefs = requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
         String deviceId = prefs.getString("id", android.os.Build.MODEL);
         newDeviceIdx = prefs.getInt("deviceCounter", 1);
 
@@ -94,6 +69,9 @@ public class CompleteEnrolment extends Fragment {
 
     //
     private void fadeIn(View view) {
+        if(view==null){
+            return;
+        }
         view.setAlpha(0f);
         view.setVisibility(View.VISIBLE);
 
@@ -103,6 +81,9 @@ public class CompleteEnrolment extends Fragment {
 
     }
     private void fadeOut(View view) {
+        if(view==null){
+            return;
+        }
         //view.setAlpha(1f);
         //view.setVisibility(View.VISIBLE);
 
@@ -120,14 +101,15 @@ public class CompleteEnrolment extends Fragment {
 
     private void crossFade(View fadeMeOut, View fadeMeIn) {
         fadeIn(fadeMeIn);
-        fadeMeOut.animate().alpha(0f).setDuration(100).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                fadeMeOut.setVisibility(View.GONE);
+        if(fadeMeOut!=null) {
+            fadeMeOut.animate().alpha(0f).setDuration(100).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    fadeMeOut.setVisibility(View.GONE);
 
-            }
-        });
-
+                }
+            });
+        }
 
     }
 
@@ -145,6 +127,10 @@ public class CompleteEnrolment extends Fragment {
         }
         companionDevice.reset();
         View view = getView();
+        if(view==null){
+            Log.d(TAG,"Cannot display error because there is no view");
+            return;
+        }
         this.inError=true;
         crossFade(view.findViewById(R.id.network_progress), view.findViewById(R.id.failed));
         fadeOut(view.findViewById(R.id.cancel_enrolment));
@@ -163,12 +149,12 @@ public class CompleteEnrolment extends Fragment {
 
     private void confirmClick(View viewButton) {
         View view= getView();
-        SharedPreferences prefs = getContext().getSharedPreferences("AppSettings", getContext().MODE_PRIVATE);
-        EditText deviceName = (EditText) view.findViewById(R.id.device_name);
-        if (deviceName.getText().toString().equals("Device_" + String.valueOf(newDeviceIdx))) {
+        SharedPreferences prefs =requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
+        EditText deviceName = (EditText) Objects.requireNonNull(view).findViewById(R.id.device_name);
+        if (deviceName!=null && deviceName.getText().toString().equals("Device_" + newDeviceIdx)) {
             SharedPreferences.Editor editor = prefs.edit();
             editor.putInt("deviceCounter", ++newDeviceIdx);
-            editor.commit();
+            editor.apply();
         }
 
         fadeIn(view.findViewById(R.id.progress_spinner));
@@ -183,31 +169,27 @@ public class CompleteEnrolment extends Fragment {
 
     private void cancelClicked(View viewButton) {
         View view= getView();
-        view.findViewById(R.id.confirm_button).setEnabled(false);
+
+        View confirmButton = Objects.requireNonNull(view).findViewById(R.id.confirm_button);
+        if(confirmButton !=null){
+            confirmButton.setEnabled(false);
+        }
         viewButton.setEnabled(false);
         companionDevice.reset();
         GifDrawable drawable = (GifDrawable) ((GifImageView) view.findViewById(R.id.failed)).getDrawable();
-        drawable.addAnimationListener(new AnimationListener() {
-            @Override
-            public void onAnimationCompleted(int loopNumber) {
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        NavHostFragment.findNavController(CompleteEnrolment.this).navigate(R.id.action_completeEnrolment_to_HomeFragment);
-                    }
-                }, 1500);
+        drawable.addAnimationListener(loopNumber -> {
+            final Handler handler = new Handler();
+            handler.postDelayed(() -> NavHostFragment.findNavController(CompleteEnrolment.this).navigate(R.id.action_completeEnrolment_to_HomeFragment), 1500);
 
 
-            }
         });
         crossFade(view.findViewById(R.id.network_progress), view.findViewById(R.id.failed));
 
     }
 
     private void processAwaitingUI(String protocolState) throws StorageException {
-        View view= getView();
-        if (protocolState == "INIT_WSS") {
+
+        if (protocolState.equals("INIT_WSS")) {
             IdentityStore identityStore = IdentityStore.getInstance();
             if (identityStore.hasPublicIdentity(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY))) {
                 showDuplicateError();
@@ -220,7 +202,7 @@ public class CompleteEnrolment extends Fragment {
     private void updateProgress(Protocol.STATUS protocolStatus) {
         View view= getView();
         if (protocolStatus != Protocol.STATUS.IDLE) {
-            ((CircularProgressIndicator) view.findViewById(R.id.progress_spinner)).setProgress(companionDevice.getProgress(), true);
+            ((CircularProgressIndicator) Objects.requireNonNull(view).findViewById(R.id.progress_spinner)).setProgress(companionDevice.getProgress(), true);
         }
     }
 
@@ -228,24 +210,16 @@ public class CompleteEnrolment extends Fragment {
         View view= getView();
         Log.d(TAG, "Protocol finished will write out data");
         IdentityStore identityStore = IdentityStore.getInstance();
-        String deviceNameStr = ((EditText) view.findViewById(R.id.device_name)).getText().toString();
+        String deviceNameStr = ((EditText) Objects.requireNonNull(view).findViewById(R.id.device_name)).getText().toString();
         identityStore.storePublicIdentity(deviceNameStr, companionDevice.getProtocolData(Constants.PC_PUBLIC_KEY));
         companionDevice.reset();
 
         GifDrawable drawable = (GifDrawable) ((GifImageView) view.findViewById(R.id.complete)).getDrawable();
-        drawable.addAnimationListener(new AnimationListener() {
-            @Override
-            public void onAnimationCompleted(int loopNumber) {
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        NavHostFragment.findNavController(CompleteEnrolment.this).navigate(R.id.action_completeEnrolment_to_HomeFragment);
-                    }
-                }, 1500);
+        drawable.addAnimationListener(loopNumber -> {
+            final Handler handler = new Handler();
+            handler.postDelayed(() -> NavHostFragment.findNavController(CompleteEnrolment.this).navigate(R.id.action_completeEnrolment_to_HomeFragment), 1500);
 
 
-            }
         });
         //This must be called last as on completion of the animation the page will
         //navigate away.
@@ -255,16 +229,16 @@ public class CompleteEnrolment extends Fragment {
     }
 
     private void protocolStatusUpdate(Protocol.STATUS status) throws StorageException {
-        View view= getView();
-        Protocol.STATUS protocolStatus = status;
+
+
         String protocolState = companionDevice.getCurrentStateOfProtocol();
-        Log.d(TAG, "ProtocolStatus:" + protocolStatus);
+        Log.d(TAG, "ProtocolStatus:" + status);
         Log.d(TAG, "ProtocolState:" + protocolState);
-        updateProgress(protocolStatus);
-        if (protocolStatus == Protocol.STATUS.AWAITING_UI) {
+        updateProgress(status);
+        if (status == Protocol.STATUS.AWAITING_UI) {
             processAwaitingUI(protocolState);
         }
-        if (protocolStatus == Protocol.STATUS.FINISHED) {
+        if (status == Protocol.STATUS.FINISHED) {
             protocolFinished();
         }
     }
@@ -274,26 +248,10 @@ public class CompleteEnrolment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_complete_enrolment, container, false);
         EditText deviceName = (EditText) view.findViewById(R.id.device_name);
-        deviceName.setText("Device_" + String.valueOf(this.newDeviceIdx));
-        view.findViewById(R.id.confirm_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View viewButton) {
-                confirmClick(viewButton);
-            }
-        });
-        view.findViewById(R.id.ok_error_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View viewButton) {
-                NavHostFragment.findNavController(CompleteEnrolment.this).navigate(R.id.action_completeEnrolment_to_HomeFragment);
-
-            }
-        });
-        view.findViewById(R.id.cancel_enrolment).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View viewButton) {
-                cancelClicked(viewButton);
-            }
-        });
+        deviceName.setText(getString(R.string.device_name_placeholder, this.newDeviceIdx));
+        view.findViewById(R.id.confirm_button).setOnClickListener(this::confirmClick);
+        view.findViewById(R.id.ok_error_button).setOnClickListener(viewButton -> NavHostFragment.findNavController(CompleteEnrolment.this).navigate(R.id.action_completeEnrolment_to_HomeFragment));
+        view.findViewById(R.id.cancel_enrolment).setOnClickListener(this::cancelClicked);
         CompleteEnrolmentViewModel completeEnrolModel = new ViewModelProvider(requireActivity()).get(CompleteEnrolmentViewModel.class);
         companionDevice.setProtocolViewModel(completeEnrolModel);
         completeEnrolModel.getProtocolStatus().observe(getViewLifecycleOwner(), status -> {
@@ -305,8 +263,8 @@ public class CompleteEnrolment extends Fragment {
             }
         });
         completeEnrolModel.getProtocolState().observe(getViewLifecycleOwner(), state -> {
-            String stateStr = (String) state;
-            ((TextView) view.findViewById(R.id.progress_status)).setText(stateStr);
+
+            ((TextView) view.findViewById(R.id.progress_status)).setText(state);
         });
         SharedViewModel model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         model.getMessage().observe(getViewLifecycleOwner(), item -> {
