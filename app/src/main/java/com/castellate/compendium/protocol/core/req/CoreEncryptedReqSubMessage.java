@@ -1,9 +1,10 @@
 package com.castellate.compendium.protocol.core.req;
 
 import com.castellate.compendium.data.IdentityStore;
-import com.castellate.compendium.data.StorageException;
+import com.castellate.compendium.exceptions.StorageException;
 import com.castellate.compendium.protocol.messages.Constants;
 import com.castellate.compendium.protocol.messages.ProtocolMessage;
+import com.castellate.compendium.protocol.messages.ProtocolMessageException;
 import com.castellate.compendium.protocol.messages.StoreProtocolData;
 import com.castellate.compendium.protocol.messages.VerifySignature;
 
@@ -70,13 +71,12 @@ public class CoreEncryptedReqSubMessage extends ProtocolMessage implements Verif
     }
 
     @Override
-    public String getPublicKey(Map<String,String>protocolData) {
+    public String getPublicKey(Map<String,String>protocolData) throws ProtocolMessageException {
         try {
             return IdentityStore.getInstance().getPublicIdentityById(protocolData.get(Constants.HASH_PC_PUBLIC_KEY));
         } catch (StorageException e) {
-            e.printStackTrace();
+            throw new ProtocolMessageException("Exception getting PC Public Key ID",e);
         }
-        return null;
     }
 
     @Override

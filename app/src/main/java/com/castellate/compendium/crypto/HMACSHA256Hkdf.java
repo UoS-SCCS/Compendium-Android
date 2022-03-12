@@ -37,9 +37,8 @@ public final class HMACSHA256Hkdf {
     /**
      * Computes an HKDF.
      *
-     * @param macAlgorithm the MAC algorithm used for computing the Hkdf. I.e., "HMACSHA1" or
-     *     "HMACSHA256".
-     * @param ikm the input keying material.
+     *
+     * @param sharedSecret the shared secret from Diffie-Hellman
      * @param salt optional salt. A possibly non-secret random value. If no salt is provided (i.e. if
      *     salt has length 0) then an array of 0s of the same size as the hash digest is used as salt.
      * @param info optional context and application specific information.

@@ -7,6 +7,7 @@ import com.castellate.compendium.protocol.enrol.InitWSSProtocolMessage;
 import com.castellate.compendium.protocol.enrol.InitWSSRespProtocolMessage;
 import com.castellate.compendium.protocol.messages.EmptyProtocolMessage;
 import com.castellate.compendium.protocol.messages.ProtocolMessage;
+import com.castellate.compendium.protocol.messages.ProtocolMessageException;
 
 public class CoreProtocol extends Protocol {
 
@@ -59,7 +60,7 @@ public class CoreProtocol extends Protocol {
 
 
     @Override
-    public boolean processIncomingMessage(ProtocolMessage protoMessage) {
+    public boolean processIncomingMessage(ProtocolMessage protoMessage) throws ProtocolMessageException {
         return protoMessage.processMessage(this.protocolData);
     }
 

@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.castellate.compendium.protocol.messages.ProtocolMessage;
 import com.castellate.compendium.protocol.messages.ProtocolMessageException;
-import com.castellate.compendium.ws.ProtocolViewModel;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,7 +42,7 @@ public abstract class Protocol {
     public abstract boolean isFinished();
 
     public abstract String getProtocolStateString();
-    public abstract boolean processIncomingMessage(ProtocolMessage protoMessage);
+    public abstract boolean processIncomingMessage(ProtocolMessage protoMessage) throws ProtocolMessageException;
     protected STATUS status = STATUS.IDLE;
     public STATUS getStatus(){
         return status;
@@ -64,16 +63,22 @@ public abstract class Protocol {
 
             }
         } catch (IllegalAccessException | InstantiationException e) {
-            status = STATUS.AWAITING_RESPONSE;
+            status = STATUS.ERROR;
             return shareStatus(status);
         }
         if(!protoMessage.parse(msg)){
             status = STATUS.AWAITING_RESPONSE;
             return shareStatus(status);
         }
-        if(!processIncomingMessage(protoMessage) || !protoMessage.processSubMessages(protocolData) ){
+        try {
+            if (!processIncomingMessage(protoMessage) || !protoMessage.processSubMessages(protocolData)) {
 
-            status = STATUS.AWAITING_RESPONSE;
+                status = STATUS.AWAITING_RESPONSE;
+                return shareStatus(status);
+            }
+        }catch(ProtocolMessageException e){
+            Log.e(TAG,"Exception processing incoming message", e);
+            status = STATUS.ERROR;
             return shareStatus(status);
         }
         if(advancedStateTriggerUI()){
@@ -174,5 +179,9 @@ public abstract class Protocol {
         protoMessage.prepareOutgoingMessage(protocolData);
         nextMessage = protoMessage;
 
+    }
+    public void setErrorStatus(){
+        this.status = STATUS.ERROR;
+        shareStatus(this.status);
     }
 }

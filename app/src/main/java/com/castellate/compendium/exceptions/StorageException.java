@@ -1,6 +1,6 @@
-package com.castellate.compendium.data;
+package com.castellate.compendium.exceptions;
 
-public class StorageException extends Exception{
+public class StorageException extends CompendiumException {
     public StorageException() {
     }
 

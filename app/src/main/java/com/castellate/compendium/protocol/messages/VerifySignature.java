@@ -5,5 +5,5 @@ import java.util.Map;
 public interface VerifySignature {
     public String getSignature();
     public String[] getSignatureFields();
-    public String getPublicKey(Map<String,String> protocolData);
+    public String getPublicKey(Map<String,String> protocolData) throws ProtocolMessageException;
 }

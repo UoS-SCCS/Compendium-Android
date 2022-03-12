@@ -1,6 +1,8 @@
 package com.castellate.compendium.protocol;
 
-public class ProtocolException extends Exception{
+import com.castellate.compendium.exceptions.CompendiumException;
+
+public class ProtocolException extends CompendiumException {
     public ProtocolException() {
     }
 

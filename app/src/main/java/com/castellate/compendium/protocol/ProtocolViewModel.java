@@ -1,8 +1,6 @@
-package com.castellate.compendium.ws;
+package com.castellate.compendium.protocol;
 
 import androidx.lifecycle.MutableLiveData;
-
-import com.castellate.compendium.protocol.Protocol;
 
 public interface ProtocolViewModel {
     public void postProtocolStatus(Protocol.STATUS status);

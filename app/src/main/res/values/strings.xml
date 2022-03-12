@@ -18,18 +18,22 @@
     <string name="connecting_label">Connecting...</string>
     <string name="enrol_btn_text">Enrol</string>
     <string name="enrol_request_text">Enrolment Request</string>
-    <string name="enrol_explain">Please confirm you want to enrol with the following PC:</string>
+    <string name="enrol_explain">Please confirm you want to enrol and provide a name for this device:</string>
     <string name="device_name_lbl">Device Name:</string>
     <string name="confirm_btn">Confirm</string>
     <string name="cancel_btn">Cancel</string>
+    <string name="ok_btn">Ok</string>
     <string name="loading_text">Loading...</string>
     <string name="notifications_btn_text">Notifications</string>
     <string name="key_manager_btn_text">Key Manager</string>
     <string name="qr_code_title">Scan to Enrol</string>
     <string name="finish_btn">Finish</string>
     <string name="app_title">Compendium</string>
+    <string name="error_title">Error</string>
+    <string name="generic_enrol_error">"An error has occurred, enrolment cannot continue."</string>
     <string name="connect_fragment_title">Compendium Request</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="error_explain">An error has occurred</string>
 
 </resources>

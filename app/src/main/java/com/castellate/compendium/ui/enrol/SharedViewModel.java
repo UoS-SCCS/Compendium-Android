@@ -1,4 +1,4 @@
-package com.castellate.compendium;
+package com.castellate.compendium.ui.enrol;
 
 import android.util.Log;
 

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.castellate.compendium.crypto.CryptoException;
 import com.castellate.compendium.crypto.CryptoUtils;
+import com.castellate.compendium.exceptions.StorageException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,15 +21,15 @@ import java.util.List;
 
 public class IdentityStore {
     private static final String FILE_NAME = "identityStore.json";
-    private static final String NAMEIDX = "names";
+    private static final String NAME_IDX = "names";
+    private static final String KEY_NAME_IDX = "key-names";
     private static final String KEYS = "keys";
-    private static final String NAME = "id";
+    private static final String NAME = "name";
     private static final String APPS = "apps";
-    private File storageDir;
     private File dataFile;
     private volatile JSONObject data;
     private static final String TAG = "IdentityStore";
-    private static volatile IdentityStore instance = new IdentityStore();
+    private static final IdentityStore instance = new IdentityStore();
     private volatile boolean initialised = false;
     public static IdentityStore getInstance() {
         return instance;
@@ -41,7 +42,7 @@ public class IdentityStore {
     public boolean isInitialised(){
         return this.initialised;
     }
-    private void checkInitialised() throws StorageException{
+    private void checkInitialised() throws StorageException {
         if(!this.initialised){
             throw new StorageException("Storage not initialised");
         }
@@ -49,8 +50,9 @@ public class IdentityStore {
     private synchronized void createStructure() throws StorageException {
         data = new JSONObject();
         try {
-            data.put(NAMEIDX, new JSONObject());
+            data.put(NAME_IDX, new JSONObject());
             data.put(KEYS, new JSONObject());
+            data.put(KEY_NAME_IDX, new JSONObject());
             data.put(NAME, "");
             data.put(APPS, new JSONObject());
             store();
@@ -63,8 +65,7 @@ public class IdentityStore {
         if(this.initialised){
             return;
         }
-        this.storageDir = storageDirectory;
-        dataFile = new File(storageDir, FILE_NAME);
+        dataFile = new File(storageDirectory, FILE_NAME);
         this.initialised = true;
         if (!dataFile.exists()) {
             createStructure();
@@ -78,8 +79,8 @@ public class IdentityStore {
         BufferedReader br = null;
         try {
             br = new BufferedReader(new FileReader(this.dataFile));
-            StringBuffer buffer = new StringBuffer();
-            String line = null;
+            StringBuilder buffer = new StringBuilder();
+            String line;
             while ((line = br.readLine()) != null) {
                 buffer.append(line);
             }
@@ -89,9 +90,11 @@ public class IdentityStore {
             throw new StorageException("Exception writing JSON data", e);
         } finally {
             try {
-                br.close();
+                if(br!=null) {
+                    br.close();
+                }
             } catch (IOException e) {
-                throw new StorageException("Exception closing write file", e);
+                Log.e(TAG,"IOException in finally closing reader",e);
             }
         }
 
@@ -110,7 +113,7 @@ public class IdentityStore {
                 try {
                     fw.close();
                 } catch (IOException e) {
-                    throw new StorageException("Exception closing file whilst writing JSON to file", e);
+                    Log.e(TAG,"IOException in finally whilst writing JSON to file",e);
                 }
             }
         }
@@ -118,32 +121,33 @@ public class IdentityStore {
 
     }
 
-    public void storePublicIdentity(String id, ECPublicKey key) throws StorageException {
+    public void storePublicIdentity(String name, ECPublicKey key) throws StorageException {
         checkInitialised();
         try {
             String keyId = CryptoUtils.getPublicKeyId(key);
             String keyStr = CryptoUtils.encodePublicKey(key);
-            storePublicIdentity(id, keyStr, keyId);
+            storePublicIdentity(name, keyStr, keyId);
         } catch (CryptoException e) {
             throw new StorageException("Exception storing public key", e);
         }
     }
 
-    public void storePublicIdentity(String id, String key) throws StorageException {
+    public void storePublicIdentity(String name, String key) throws StorageException {
         checkInitialised();
         try {
             String keyId = CryptoUtils.getPublicKeyId(CryptoUtils.getPublicKey(key));
-            storePublicIdentity(id, key, keyId);
+            storePublicIdentity(name, key, keyId);
         } catch (CryptoException e) {
             throw new StorageException("Exception storing public key", e);
         }
     }
 
-    public synchronized void storePublicIdentity(String id, String key, String key_id) throws StorageException {
+    public synchronized void storePublicIdentity(String name, String key, String keyId) throws StorageException {
         checkInitialised();
         try {
-            data.getJSONObject(KEYS).put(key_id, key);
-            data.getJSONObject(NAMEIDX).put(id, key_id);
+            data.getJSONObject(KEYS).put(keyId, key);
+            data.getJSONObject(NAME_IDX).put(name, keyId);
+            data.getJSONObject(KEY_NAME_IDX).put(keyId,name);
             this.store();
         }catch(JSONException e){
             throw new StorageException("Exception adding key to JSON",e);
@@ -152,14 +156,26 @@ public class IdentityStore {
     public String getPublicIdentityByName(String name) throws StorageException{
         checkInitialised();
         try {
-            if (this.data.getJSONObject(NAMEIDX).has(name)) {
-                String keyId = this.data.getJSONObject(NAMEIDX).getString(name);
+            if (this.data.getJSONObject(NAME_IDX).has(name)) {
+                String keyId = this.data.getJSONObject(NAME_IDX).getString(name);
                 return getPublicIdentityById(keyId);
             }else {
                 return null;
             }
         }catch(JSONException e){
             throw new StorageException("Exception reading key by name",e);
+        }
+    }
+    public String getNameByKeyID(String keyId) throws StorageException{
+        checkInitialised();
+        try {
+            if (this.data.getJSONObject(KEY_NAME_IDX).has(keyId)) {
+                return this.data.getJSONObject(KEY_NAME_IDX).getString(keyId);
+            } else {
+                return null;
+            }
+        }catch(JSONException e){
+            throw new StorageException("Exception reading key by id",e);
         }
     }
     public String getPublicIdentityById(String keyId) throws StorageException{
@@ -177,7 +193,12 @@ public class IdentityStore {
     public List<String> getKeyNames() throws StorageException {
         checkInitialised();
         try {
-            return convertJSONArrayToList(this.data.getJSONObject(NAMEIDX).names());
+
+            JSONArray names = this.data.getJSONObject(NAME_IDX).names();
+            if(names!=null) {
+                return convertJSONArrayToList(names);
+            }
+            return new ArrayList<>();
         } catch (JSONException e) {
             throw new StorageException("Exception getting names",e);
         }
@@ -185,13 +206,17 @@ public class IdentityStore {
     public List<String> getKeyIds() throws StorageException {
         checkInitialised();
         try {
-            return convertJSONArrayToList(this.data.getJSONObject(KEYS).names());
+            JSONArray names = this.data.getJSONObject(KEYS).names();
+            if(names!=null) {
+                return convertJSONArrayToList(names);
+            }
+            return new ArrayList<>();
         } catch (JSONException e) {
             throw new StorageException("Exception getting id",e);
         }
     }
     private List<String> convertJSONArrayToList(JSONArray arr) throws JSONException {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for(int i=0;i<arr.length();i++){
             list.add(arr.getString(i));
         }
@@ -216,4 +241,13 @@ public class IdentityStore {
     }
 
 
+    public boolean hasPublicIdentity(String keyId)throws StorageException {
+        checkInitialised();
+        try {
+            return this.data.getJSONObject(KEYS).has(keyId);
+        }catch(JSONException e){
+            throw new StorageException("Exception setting name",e);
+        }
+
+    }
 }

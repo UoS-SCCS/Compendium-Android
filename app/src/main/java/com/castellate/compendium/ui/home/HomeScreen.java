@@ -1,4 +1,4 @@
-package com.castellate.compendium;
+package com.castellate.compendium.ui.home;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.transition.TransitionInflater;
 
+import com.castellate.compendium.R;
 import com.castellate.compendium.databinding.HomeScreenBinding;
 
 public class HomeScreen extends Fragment {
@@ -28,7 +29,7 @@ public class HomeScreen extends Fragment {
 
     @Override
     public View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
+            @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
 
@@ -40,28 +41,12 @@ public class HomeScreen extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        binding.buttonEnrol.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                NavHostFragment.findNavController(HomeScreen.this)
-                        .navigate(R.id.action_HomeFragment_to_QRCodeFragment);
-            }
-        });
-        binding.buttonNotifications.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NavHostFragment.findNavController(HomeScreen.this)
-                        .navigate(R.id.action_HomeFragment_to_itemFragment);
-            }
-        });
-        binding.buttonKeymanager.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NavHostFragment.findNavController(HomeScreen.this)
-                        .navigate(R.id.action_HomeFragment_to_itemFragment);
-            }
-        });
+        binding.buttonEnrol.setOnClickListener(enrolView -> NavHostFragment.findNavController(HomeScreen.this)
+                .navigate(R.id.action_HomeFragment_to_QRCodeFragment));
+        binding.buttonNotifications.setOnClickListener(notificationView -> NavHostFragment.findNavController(HomeScreen.this)
+                .navigate(R.id.action_HomeFragment_to_itemFragment));
+        binding.buttonKeymanager.setOnClickListener(keyManagerView -> NavHostFragment.findNavController(HomeScreen.this)
+                .navigate(R.id.action_HomeFragment_to_itemFragment));
     }
 
     @Override

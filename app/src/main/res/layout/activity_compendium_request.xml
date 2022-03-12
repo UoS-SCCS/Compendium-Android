@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CompendiumRequestActivity">
+    tools:context=".ui.request.CompendiumRequestActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -19,7 +19,7 @@
             android:background="@color/sccsColour"
             app:popupTheme="@style/Theme.Compendium.PopupOverlay"
             app:title="Compendium Request"
-            app:titleTextColor="@android:color/primary_text_light" />
+            />
 
     </com.google.android.material.appbar.AppBarLayout>
 

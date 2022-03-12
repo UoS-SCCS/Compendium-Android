@@ -2,6 +2,7 @@ package com.castellate.compendium.protocol.enrol;
 
 import com.castellate.compendium.protocol.Protocol;
 import com.castellate.compendium.protocol.messages.ProtocolMessage;
+import com.castellate.compendium.protocol.messages.ProtocolMessageException;
 
 public class EnrolProtocol extends Protocol {
     public enum STATE {
@@ -42,7 +43,7 @@ public class EnrolProtocol extends Protocol {
 
 
     @Override
-    public boolean processIncomingMessage(ProtocolMessage protoMessage) {
+    public boolean processIncomingMessage(ProtocolMessage protoMessage) throws ProtocolMessageException {
         return protoMessage.processMessage(this.protocolData);
     }
 

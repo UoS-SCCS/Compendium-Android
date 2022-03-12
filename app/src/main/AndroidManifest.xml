@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.castellate.compendium">
+    package="com.castellate.compendium" xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:name="android.hardware.camera.any" />
@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Compendium">
         <activity
-            android:name=".CompendiumRequestActivity"
+            android:name=".ui.request.CompendiumRequestActivity"
             android:exported="false"
             android:label="@string/title_activity_compendium_request"
             android:theme="@style/Theme.Compendium.NoActionBar"
@@ -41,7 +41,7 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/default_notification_channel_id" /> <!-- [END fcm_default_channel] -->
         <service
-            android:name=".CompendiumFirebaseNotificationService"
+            android:name=".notifications.CompendiumFirebaseNotificationService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -55,10 +55,17 @@
             android:theme="@style/Theme.Compendium.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data  android:name="com.castellate.compendium.data.Config"
+                android:value="androidx.startup" />
+        </provider>
     </application>
 
 </manifest>

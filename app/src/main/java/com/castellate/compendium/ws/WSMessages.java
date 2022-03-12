@@ -15,7 +15,7 @@ public class WSMessages {
     public static final String MSG_TYPE = "type";
     public static final Map<String, String[]> TYPE_FIELDS = ImmutableMap.of(MsgTypes.INIT, InitMsg.ALL_FIELDS, MsgTypes.INITRESP, InitRespMsg.ALL_FIELDS, MsgTypes.DELIVER, DeliverMsg.ALL_FIELDS, MsgTypes.ROUTE, RouteMsg.ALL_FIELDS, MsgTypes.ERROR, ErrorMsg.ALL_FIELDS);
 
-    public static final JSONObject parse(String message){
+    public static JSONObject parse(String message){
 
         try {
             JSONObject msg = new JSONObject(message);
@@ -31,7 +31,7 @@ public class WSMessages {
             return null;
         }
     }
-    public static final JSONObject createInitMsg(){
+    public static JSONObject createInitMsg(){
         try {
             JSONObject msg = new JSONObject();
             msg.put(MSG_TYPE, MsgTypes.INIT);
@@ -40,7 +40,7 @@ public class WSMessages {
             return new JSONObject();
         }
     }
-    public static final JSONObject createRoute(String adr, JSONObject content){
+    public static JSONObject createRoute(String adr, JSONObject content){
         try {
             JSONObject msg = new JSONObject();
             msg.put(MSG_TYPE, MsgTypes.ROUTE);
@@ -52,8 +52,11 @@ public class WSMessages {
         }
     }
 
-    private static final boolean validate(JSONObject msg, String[] fields){
-        Set<String> allFields = new HashSet<String>();
+    private static boolean validate(JSONObject msg, String[] fields){
+        if(fields ==null){
+            return false;
+        }
+        Set<String> allFields = new HashSet<>();
         for(String field :fields){
             if(!msg.has(field)){
                 return false;

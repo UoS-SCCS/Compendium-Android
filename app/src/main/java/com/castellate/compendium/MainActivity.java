@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -19,11 +20,10 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.castellate.compendium.crypto.CompanionKeyManager;
 import com.castellate.compendium.data.IdentityStore;
-import com.castellate.compendium.data.PushServerManager;
-import com.castellate.compendium.data.StorageException;
 import com.castellate.compendium.databinding.ActivityMainBinding;
+import com.castellate.compendium.exceptions.StorageException;
+import com.castellate.compendium.push.PushServerManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        boolean errorOccurred = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
             String channelId = getString(R.string.default_notification_channel_id);
@@ -44,18 +45,25 @@ public class MainActivity extends AppCompatActivity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH));
         }
-
+        /**
         CompanionKeyManager ckm = new CompanionKeyManager();
         Log.d(TAG,"Keys:" + ckm.getKeyList());
         ckm.testAddKey();
         Log.d(TAG,"Keys1:" + ckm.getKeyList());
         ckm.testDelKey();
-        Log.d(TAG,"Keys2:" + ckm.getKeyList());
+        Log.d(TAG,"Keys2:" + ckm.getKeyList());*/
         IdentityStore identityStore = IdentityStore.getInstance();
         try {
             identityStore.init(getFilesDir());
         } catch (StorageException e) {
-            e.printStackTrace();
+            Log.d(TAG,"Unable to access Identity Store, will stop",e);
+            AlertDialog.Builder builder =
+                    new AlertDialog.Builder(this);
+            builder.setTitle("Error Loading");
+            builder.setMessage("The app is unable to access the identity store and will close.");
+            builder.setPositiveButton("OK", (dialogInterface, i) -> finish());
+            builder.show();
+            errorOccurred=true;
         }
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -68,7 +76,9 @@ public class MainActivity extends AppCompatActivity {
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
-
+        if(errorOccurred){
+            return;
+        }
         // If a notification message is tapped, any data accompanying the notification
         // message is available in the intent extras. In this sample the launcher
         // intent is fired when the notification is tapped, so any accompanying data would
@@ -85,9 +95,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         PushServerManager.checkRegistered(getApplicationContext());
-        if (hasCameraPermission()) {
-            //
-        } else {
+        if (!hasCameraPermission()) {
             this.requestPermission();
         }
 

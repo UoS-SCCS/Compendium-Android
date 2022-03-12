@@ -1,14 +1,14 @@
-package com.castellate.compendium;
+package com.castellate.compendium.ui.request;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.castellate.compendium.protocol.Protocol;
-import com.castellate.compendium.ws.ProtocolViewModel;
+import com.castellate.compendium.protocol.ProtocolViewModel;
 
-public class CompleteEnrolmentViewModel extends ViewModel implements ProtocolViewModel {
-    private final MutableLiveData<Protocol.STATUS> protocolStatus = new MutableLiveData<Protocol.STATUS>();
-    private final MutableLiveData<String> protocolState = new MutableLiveData<String>();
+public class RequestViewModel extends ViewModel implements ProtocolViewModel {
+    private final MutableLiveData<Protocol.STATUS> protocolStatus = new MutableLiveData<>();
+    private final MutableLiveData<String> protocolState = new MutableLiveData<>();
 
     public void setProtocolStatus(Protocol.STATUS status){
         protocolStatus.setValue(status);

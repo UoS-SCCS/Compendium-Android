@@ -1,6 +1,8 @@
 package com.castellate.compendium.crypto;
 
-public class CryptoException extends Exception{
+import com.castellate.compendium.exceptions.CompendiumException;
+
+public class CryptoException extends CompendiumException {
     public CryptoException() {
     }
 

@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/HomeFragment"
-        android:name="com.castellate.compendium.HomeScreen"
+        android:name="com.castellate.compendium.ui.home.HomeScreen"
         android:label="@string/app_name"
         tools:layout="@layout/home_screen">
         <action
@@ -29,7 +29,7 @@
     </fragment>
     <fragment
         android:id="@+id/QRCodeFragment"
-        android:name="com.castellate.compendium.QRCodeFragment"
+        android:name="com.castellate.compendium.ui.enrol.QRCodeFragment"
         android:label="@string/qr_code_title"
         tools:layout="@layout/fragment_q_r_code" >
         <action
@@ -43,7 +43,7 @@
         tools:layout="@layout/fragment_notification_item_list" />
     <fragment
         android:id="@+id/completeEnrolment"
-        android:name="com.castellate.compendium.CompleteEnrolment"
+        android:name="com.castellate.compendium.ui.enrol.CompleteEnrolment"
         android:label="Enrol Device"
         tools:layout="@layout/fragment_complete_enrolment" >
         <action

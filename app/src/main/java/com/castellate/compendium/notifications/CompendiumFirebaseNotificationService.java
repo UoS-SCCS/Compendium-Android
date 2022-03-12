@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.castellate.compendium;
+package com.castellate.compendium.notifications;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,9 +24,13 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
-import com.castellate.compendium.data.PushServerManager;
+import com.castellate.compendium.R;
+import com.castellate.compendium.push.PushServerManager;
+import com.castellate.compendium.exceptions.CompendiumException;
+import com.castellate.compendium.ui.request.CompendiumRequestActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -118,7 +122,7 @@ public class CompendiumFirebaseNotificationService extends FirebaseMessagingServ
      * C) User clears app data
      */
     @Override
-    public void onNewToken(String token) {
+    public void onNewToken(@NonNull  String token) {
         Log.d(TAG, "Refreshed token: " + token);
         // Instantiate the RequestQueue.
 
@@ -150,7 +154,12 @@ public class CompendiumFirebaseNotificationService extends FirebaseMessagingServ
      */
     private void sendRegistrationToServer(String token) {
         // TODO: Implement this method to send token to your app server.
-        PushServerManager.sendTokenToServer(token, getApplicationContext());
+        try {
+            PushServerManager.sendTokenToServer(token, getApplicationContext());
+        } catch (CompendiumException e) {
+            Log.d(TAG,"Exception sending registration to server",e);
+            //TODO we need to handle a retry at some point
+        }
     }
 
     /**
@@ -165,7 +174,7 @@ public class CompendiumFirebaseNotificationService extends FirebaseMessagingServ
             intent.putExtra(key, data.get(key));
         }
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+                PendingIntent.FLAG_ONE_SHOT|PendingIntent.FLAG_IMMUTABLE);
 
         String channelId = getString(R.string.default_notification_channel_id);
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);

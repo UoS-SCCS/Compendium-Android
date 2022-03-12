@@ -1,11 +1,12 @@
 package com.castellate.compendium.protocol.core;
 
 import com.castellate.compendium.data.IdentityStore;
-import com.castellate.compendium.data.StorageException;
+import com.castellate.compendium.exceptions.StorageException;
 import com.castellate.compendium.protocol.enrol.InitKeyReqProtocolMessage;
 import com.castellate.compendium.protocol.messages.Constants;
 import com.castellate.compendium.protocol.messages.InitKeyRespProtocolMessage;
 import com.castellate.compendium.protocol.messages.ProtocolMessage;
+import com.castellate.compendium.protocol.messages.ProtocolMessageException;
 import com.castellate.compendium.protocol.messages.VerifySignature;
 
 import java.util.Map;
@@ -39,14 +40,12 @@ public class ConfirmKeyEncryptedSubMessage extends ProtocolMessage implements Ve
     }
 
     @Override
-    public String getPublicKey(Map<String,String>protocolData) {
+    public String getPublicKey(Map<String,String>protocolData) throws ProtocolMessageException {
         try {
             return IdentityStore.getInstance().getPublicIdentityById(protocolData.get(Constants.HASH_PC_PUBLIC_KEY));
         } catch (StorageException e) {
-            e.printStackTrace();
+            throw new ProtocolMessageException("Exception accessing PC Public key",e);
         }
-        return null;
-
     }
 
     public static final class Fields {

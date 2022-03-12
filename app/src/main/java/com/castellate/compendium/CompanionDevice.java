@@ -1,4 +1,4 @@
-package com.castellate.compendium.ws;
+package com.castellate.compendium;
 
 import static com.castellate.compendium.protocol.Protocol.STATUS.READY_TO_SEND;
 import static com.castellate.compendium.protocol.messages.Constants.ID_CD;
@@ -8,6 +8,8 @@ import android.util.Log;
 import com.castellate.compendium.protocol.Protocol;
 import com.castellate.compendium.protocol.ProtocolException;
 import com.castellate.compendium.protocol.messages.ProtocolMessageException;
+import com.castellate.compendium.protocol.ProtocolViewModel;
+import com.castellate.compendium.ws.WSMessages;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
@@ -25,8 +27,8 @@ public class CompanionDevice {
     private static final String TAG = "CompanionDevice";
     private WebSocketClient mWebSocketClient;
     private Protocol currentProtocol = null;
-    private String id;
-    private Queue<String> bufferedQueue = new ConcurrentLinkedQueue();
+    private final String id;
+    private final Queue<String> bufferedQueue = new ConcurrentLinkedQueue<>();
 
     public CompanionDevice(String companionId) {
         id = companionId;
@@ -40,8 +42,6 @@ public class CompanionDevice {
         currentProtocol = protocol;
         if (currentProtocol.getStatus() == READY_TO_SEND) {
             bufferedQueue.add(currentProtocol.getNextMessage());
-        } else if (currentProtocol.getStatus() == Protocol.STATUS.AWAITING_UI) {
-
         }
         initWebSocketClient();
     }
@@ -69,7 +69,7 @@ public class CompanionDevice {
     }
 
     private synchronized void clearQueue() {
-        String msgToSend = null;
+        String msgToSend;
         Log.d(TAG, "Clearing Queue");
         while ((msgToSend = bufferedQueue.poll()) != null) {
             Log.d(TAG, "Sending queued message:" + msgToSend);
@@ -134,6 +134,10 @@ public class CompanionDevice {
 
         } catch (ProtocolMessageException e) {
             Log.e(TAG, "Exception preparing message", e);
+            if(this.currentProtocol!=null){
+                this.currentProtocol.setErrorStatus();
+            }
+
         }
     }
 
@@ -177,7 +181,11 @@ public class CompanionDevice {
             currentProtocol.parseIncomingMessage(msg);
         }
     }
-
+    public void setProtocolInError(){
+        if(currentProtocol!=null){
+            currentProtocol.setErrorStatus();
+        }
+    }
     public void setProtocolViewModel(ProtocolViewModel model) {
         if (currentProtocol != null) {
             currentProtocol.setProtocolViewModel(model);
@@ -189,7 +197,11 @@ public class CompanionDevice {
         try {
             uri = new URI("ws://10.0.2.2:8001");
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            Log.d(TAG,"WebSocketClient exception",e);
+            if(this.currentProtocol!=null){
+                this.currentProtocol.setErrorStatus();
+            }
+
             return;
         }
         mWebSocketClient = new WebSocketClient(uri, new Draft_6455()) {
@@ -222,16 +234,6 @@ public class CompanionDevice {
                 } catch (JSONException e) {
                     Log.e(TAG, "Error processing JSON message:", e);
                 }
-
-
-                /**runOnUiThread(new Runnable() {
-                @Override public void run() {
-                TextView textView = (TextView) findViewById(R.id.connect_progress_text);
-                textView.setText("WebSocket Initialised");
-                ProgressBar progress = (ProgressBar) findViewById(R.id.progressBar);
-                progress.setProgress(45);
-                }
-                });**/
             }
 
             @Override
@@ -242,6 +244,9 @@ public class CompanionDevice {
 
             @Override
             public void onError(Exception e) {
+                if(currentProtocol!=null){
+                    currentProtocol.setErrorStatus();
+                }
                 Log.d(TAG, "WebSocket Error", e);
                 //Logger.LogInfo("Websocket", "Error " + e.getMessage());
             }

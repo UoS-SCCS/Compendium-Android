@@ -3,9 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CompleteEnrolment">
+    tools:context=".ui.enrol.CompleteEnrolment">
     <com.google.android.material.progressindicator.CircularProgressIndicator
-
         android:id="@+id/progress_spinner_req"
         app:indicatorColor="@color/sccsColour"
         app:trackColor="@color/design_default_color_secondary"
@@ -17,10 +16,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-
         />
 
     <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/connect_preloader"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginLeft="20dp"
@@ -30,6 +29,19 @@
         app:layout_constraintRight_toRightOf="@id/progress_spinner_req"
         app:layout_constraintTop_toTopOf="@id/progress_spinner_req"
         android:src="@drawable/loader"
+        />
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/failed_connect"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/progress_spinner_req"
+        app:layout_constraintLeft_toLeftOf="@id/progress_spinner_req"
+        app:layout_constraintRight_toRightOf="@id/progress_spinner_req"
+        app:layout_constraintTop_toTopOf="@id/progress_spinner_req"
+        android:src="@drawable/failed_v2"
         />
     <TextView
         android:id="@+id/progress_status_req"
@@ -99,17 +111,58 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:backgroundTint="@color/sccsColour"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:text="@string/cancel_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/instructions"/>
 
 
+    <Button
+        android:id="@+id/connect_ok_error_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/ok_btn"
+        android:backgroundTint="@color/sccsColour"
+        app:icon="@drawable/ic_circle_check_solid"
+        app:iconGravity="start"
+        app:iconPadding="10dp"
+        app:iconSize="18dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/error_explain"/>
 
 
+    <TextView
+        android:id="@+id/error_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/error_title"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progress_status_req" />
 
+    <TextView
+        android:id="@+id/error_explain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:maxWidth="300dp"
 
+        android:text="@string/error_explain"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/error_title" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

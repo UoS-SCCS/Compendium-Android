@@ -45,7 +45,7 @@ public abstract class ProtocolMessage {
         return WSMessages.createRoute(protocolData.get(ADR_PC), msgData).toString();
     }
 
-    public boolean processMessage(Map<String, String> protocolData) {
+    public boolean processMessage(Map<String, String> protocolData) throws ProtocolMessageException {
         if (VerifySignature.class.isAssignableFrom(getClassObj(protocolData))) {
             VerifySignature verifySig = (VerifySignature) this;
             verifySig.getPublicKey(protocolData);
@@ -62,7 +62,7 @@ public abstract class ProtocolMessage {
         return true;
     }
 
-    public boolean processSubMessages(Map<String, String> protocolData) {
+    public boolean processSubMessages(Map<String, String> protocolData) throws ProtocolMessageException{
         if (EmbeddedEncryptedMessage.class.isAssignableFrom(getClassObj(protocolData))) {
             EmbeddedEncryptedMessage embedded = ((EmbeddedEncryptedMessage) this);
             ProtocolMessage subMessage = null;
@@ -153,16 +153,10 @@ public abstract class ProtocolMessage {
     }
 
     protected boolean validate(String[] fields) {
-        try {
-            Log.d(TAG,msgData.toString(2));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
         Set<String> allFields = new HashSet<String>();
         for (String field : fields) {
             if (!msgData.has(field)) {
                 Log.d(TAG,"Missing field :" + field);
-
                 return false;
             }
             allFields.add(field);
@@ -199,7 +193,7 @@ public abstract class ProtocolMessage {
 
     }
 
-    public void signMessage(String signatureField, String[] signatureFields, Map<String, String> protocolData) {
+    public void signMessage(String signatureField, String[] signatureFields, Map<String, String> protocolData) throws ProtocolMessageException {
         try {
             CompanionKeyManager ckm = new CompanionKeyManager();
             Signature sig = Signature.getInstance("SHA256withECDSA");
@@ -213,9 +207,8 @@ public abstract class ProtocolMessage {
             }
             byte[] sigBytes = sig.sign();
             msgData.put(signatureField, B64.encode(sigBytes));
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | JSONException e) {
-            Log.e(TAG, "Exception creating signature", e);
-            return;
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | JSONException | CryptoException e) {
+            throw new ProtocolMessageException("Exception generating signature",e);
         }
 
 

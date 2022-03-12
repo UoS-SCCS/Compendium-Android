@@ -19,12 +19,25 @@ import javax.crypto.spec.SecretKeySpec;
 public class CryptoUtils {
     private static final String PEM_HEAD = "-----BEGIN PUBLIC KEY-----";
     private static final String PEM_TAIL = "-----END PUBLIC KEY-----";
-
-    public static String getPublicKeyId(PublicKey publicKey) throws CryptoException {
-        byte[] derKey = publicKey.getEncoded();
-        MessageDigest digest = null;
+    private static final String HASH_ALG="SHA256";
+    private static final String KEY_ALG="ECDH";
+    private static final byte[] HKDF_INFO="STS Handshake data".getBytes(StandardCharsets.UTF_8);
+    private static final int HKDF_KEY_SIZE=32;
+    public static String getPublicKeyId(String publicKeyString) throws CryptoException {
+        PublicKey publicKey = CryptoUtils.getPublicKey(publicKeyString);
+        MessageDigest digest;
         try {
-            digest = MessageDigest.getInstance("SHA256");
+            digest = MessageDigest.getInstance(HASH_ALG);
+        } catch (NoSuchAlgorithmException e) {
+            throw new CryptoException("Exception converting key to hex id",e);
+        }
+        digest.update(publicKey.getEncoded());
+        return convertToHex(digest.digest());
+    }
+    public static String getPublicKeyId(PublicKey publicKey) throws CryptoException {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance(HASH_ALG);
         } catch (NoSuchAlgorithmException e) {
             throw new CryptoException("Exception converting key to hex id",e);
         }
@@ -33,10 +46,10 @@ public class CryptoUtils {
     }
 
     public static String convertToHex(byte[] bytes){
-        StringBuffer buffer = new StringBuffer();
-        for(int i=0; i < bytes.length; i++){
-            buffer.append(Character.forDigit((bytes[i] >> 4) & 0xF, 16));
-            buffer.append(Character.forDigit((bytes[i] & 0xF), 16));
+        StringBuilder buffer = new StringBuilder();
+        for (byte aByte : bytes) {
+            buffer.append(Character.forDigit((aByte >> 4) & 0xF, 16));
+            buffer.append(Character.forDigit((aByte & 0xF), 16));
         }
         return buffer.toString();
     }
@@ -73,7 +86,7 @@ public class CryptoUtils {
 
     public static byte[] performECDH(KeyPair kp, PublicKey otherPartyPublicKey) throws CryptoException {
         try {
-            KeyAgreement ka = KeyAgreement.getInstance("ECDH");
+            KeyAgreement ka = KeyAgreement.getInstance(KEY_ALG);
             ka.init(kp.getPrivate());
             ka.doPhase(otherPartyPublicKey, true);
             return ka.generateSecret();
@@ -83,7 +96,7 @@ public class CryptoUtils {
     }
     public static String deriveKey(byte[] sharedSecret) throws CryptoException{
         try {
-            byte[] derived = HMACSHA256Hkdf.computeHkdf(sharedSecret, null, "STS Handshake data".getBytes(StandardCharsets.UTF_8), 32);
+            byte[] derived = HMACSHA256Hkdf.computeHkdf(sharedSecret, null, HKDF_INFO, HKDF_KEY_SIZE);
             return B64.encode(derived);
         }catch (GeneralSecurityException e){
             throw new CryptoException("Exception deriving key", e);

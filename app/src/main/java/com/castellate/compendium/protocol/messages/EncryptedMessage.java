@@ -8,8 +8,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class EncryptedMessage {
-    private static final String IV = "iv";
-    private static final String CIPHER_TEXT = "cipher_text";
+    public static final String IV = "iv";
+    public static final String CIPHER_TEXT = "cipher_text";
     private JSONObject data;
 
     public EncryptedMessage(JSONObject msgObj) throws ProtocolMessageException {

@@ -1,6 +1,8 @@
 package com.castellate.compendium.protocol.messages;
 
-public class ProtocolMessageException extends Exception {
+import com.castellate.compendium.exceptions.CompendiumException;
+
+public class ProtocolMessageException extends CompendiumException {
     public ProtocolMessageException() {
     }
 

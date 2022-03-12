@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CompleteEnrolment">
+    tools:context=".ui.enrol.CompleteEnrolment">
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progress_spinner"
         app:indicatorColor="@color/sccsColour"
@@ -57,6 +57,19 @@
         app:layout_constraintTop_toTopOf="@id/progress_spinner"
         android:src="@drawable/tick_animation"
         />
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/failed"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/progress_spinner"
+        app:layout_constraintLeft_toLeftOf="@id/progress_spinner"
+        app:layout_constraintRight_toRightOf="@id/progress_spinner"
+        app:layout_constraintTop_toTopOf="@id/progress_spinner"
+        android:src="@drawable/failed_v2"
+        />
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
@@ -67,7 +80,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progress_spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/progress_status" />
 
     <TextView
         android:id="@+id/explain"
@@ -97,14 +110,17 @@
             android:id="@+id/device_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+
             android:textSize="18sp"
             android:textStyle="bold"
             android:text="@string/device_name_lbl" />
 
-        <TextView
+        <EditText
             android:id="@+id/device_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="175dp"
+            android:inputType="text"
              />
     </LinearLayout>
 
@@ -140,6 +156,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/label_layout" />
 
-
+    <Button
+        android:id="@+id/ok_error_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/ok_btn"
+        android:backgroundTint="@color/sccsColour"
+        app:icon="@drawable/ic_circle_check_solid"
+        app:iconGravity="start"
+        app:iconPadding="10dp"
+        app:iconSize="18dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cancel_enrolment"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
