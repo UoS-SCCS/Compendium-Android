@@ -31,6 +31,19 @@
         android:src="@drawable/loader"
         />
     <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/req_complete"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/progress_spinner_req"
+        app:layout_constraintLeft_toLeftOf="@id/progress_spinner_req"
+        app:layout_constraintRight_toRightOf="@id/progress_spinner_req"
+        app:layout_constraintTop_toTopOf="@id/progress_spinner_req"
+        android:src="@drawable/tick_animation"
+        />
+    <pl.droidsonroids.gif.GifImageView
         android:id="@+id/failed_connect"
         android:layout_width="0dp"
         android:layout_height="0dp"

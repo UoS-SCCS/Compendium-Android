@@ -14,8 +14,11 @@
             android:id="@+id/action_HomeFragment_to_QRCodeFragment"
             app:destination="@id/QRCodeFragment" />
         <action
-            android:id="@+id/action_HomeFragment_to_itemFragment"
-            app:destination="@id/itemFragment" />
+            android:id="@+id/action_HomeFragment_to_notificationsFragment"
+            app:destination="@id/notificationsFragment" />
+        <action
+            android:id="@+id/action_HomeFragment_to_keysFragment"
+            app:destination="@id/keysFragment" />
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
@@ -37,10 +40,31 @@
             app:destination="@id/completeEnrolment" />
     </fragment>
     <fragment
-        android:id="@+id/itemFragment"
-        android:name="com.castellate.compendium.ItemFragment"
-        android:label="fragment_notification_item_list"
+        android:id="@+id/notificationsFragment"
+        android:name="com.castellate.compendium.ui.notifications.NotificationsFragment"
+        android:label="@string/notfication_list_title"
         tools:layout="@layout/fragment_notification_item_list" />
+    <fragment
+        android:id="@+id/keysFragment"
+        android:name="com.castellate.compendium.ui.keys.KeysFragment"
+        android:label="@string/keys_list_title"
+        tools:layout="@layout/fragment_keys_item_list" >
+        <action
+        android:id="@+id/action_KeysFragment_to_appsFragment"
+        app:destination="@id/appsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/appsFragment"
+        android:name="com.castellate.compendium.ui.apps.AppsFragment"
+        android:label="@string/apps_list_title"
+        tools:layout="@layout/fragment_apps_item_list">
+        <argument
+            android:name="keyId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
     <fragment
         android:id="@+id/completeEnrolment"
         android:name="com.castellate.compendium.ui.enrol.CompleteEnrolment"

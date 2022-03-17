@@ -1,3 +1,31 @@
+/*
+ *
+ *  © Copyright 2022. University of Surrey
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *
+ *  1. Redistributions of source code must retain the above copyright notice,
+ *  this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright notice,
+ *  this list of conditions and the following disclaimer in the documentation
+ *  and/or other materials provided with the distribution.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.castellate.compendium.crypto;
 
 import android.security.keystore.KeyGenParameterSpec;
@@ -138,7 +166,13 @@ public class CompanionKeyManager {
         }
         return list;
     }
-
+    public boolean isNewKey(String keyId)throws CryptoException{
+        try {
+            return !keystore.containsAlias(keyId);
+        } catch (KeyStoreException e) {
+            throw new CryptoException("Exception checking if key exists",e);
+        }
+    }
     private SecretKey getOrCreateSecretKey(String keyId) throws CryptoException {
         try {
             if (keystore.containsAlias(keyId)) {
@@ -150,6 +184,28 @@ public class CompanionKeyManager {
             return keyGen.generateKey();
         } catch (KeyStoreException | NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | UnrecoverableKeyException e) {
             throw new CryptoException("Exception getting or creating secret key", e);
+        }
+    }
+
+    public void deleteKey(String keyId) throws CryptoException{
+        try {
+            keystore.deleteEntry(keyId);
+        } catch (KeyStoreException e) {
+            throw new CryptoException("Exception cleaning up unused key",e);
+        }
+    }
+    public void cleanUpUnusedKey(String keyId) throws CryptoException{
+        deleteKey(keyId);
+    }
+
+    public void reset() throws CryptoException{
+        try {
+            Enumeration<String> en = keystore.aliases();
+            while (en.hasMoreElements()) {
+                keystore.deleteEntry(en.nextElement());
+            }
+        } catch (KeyStoreException e) {
+            throw new CryptoException("Exception resetting device",e);
         }
     }
 }

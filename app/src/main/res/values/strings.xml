@@ -35,5 +35,14 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="error_explain">An error has occurred</string>
+    <string name="device_name_placeholder">Device_%1$d</string>
+    <string name="notfication_list_title">Received Notitifications</string>
+    <string name="keys_list_title">Enrolled Devices</string>
+    <string name="apps_list_title">Registered Keys</string>
+    <string name="title_activity_fullscreen_splash">FullscreenSplashActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="developed_by">Developed By</string>
+    <string name="reset">Reset</string>
 
 </resources>

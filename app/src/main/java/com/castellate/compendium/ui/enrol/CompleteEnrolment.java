@@ -1,3 +1,30 @@
+/*
+ *  © Copyright 2022. University of Surrey
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *
+ *  1. Redistributions of source code must retain the above copyright notice,
+ *  this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright notice,
+ *  this list of conditions and the following disclaimer in the documentation
+ *  and/or other materials provided with the distribution.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.castellate.compendium.ui.enrol;
 
 import android.animation.Animator;
@@ -7,6 +34,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +44,7 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.transition.TransitionInflater;
+import androidx.transition.Slide;
 
 import com.castellate.compendium.CompanionDevice;
 import com.castellate.compendium.R;
@@ -56,9 +84,10 @@ public class CompleteEnrolment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TransitionInflater inflater = TransitionInflater.from(requireContext());
-        setExitTransition(inflater.inflateTransition(R.transition.slide_left));
-        setEnterTransition(inflater.inflateTransition(R.transition.slide_right));
+        //TransitionInflater inflater = TransitionInflater.from(requireContext());
+        //setExitTransition(inflater.inflateTransition(R.transition.slide_left));
+        //setEnterTransition(inflater.inflateTransition(R.transition.slide_right));
+        setExitTransition(new Slide(Gravity.START));
         SharedPreferences prefs = requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
         String deviceId = prefs.getString("id", android.os.Build.MODEL);
         newDeviceIdx = prefs.getInt("deviceCounter", 1);
@@ -125,6 +154,7 @@ public class CompleteEnrolment extends Fragment {
         if(inError){
             return;
         }
+        companionDevice.setProtocolInError(102,customText);
         companionDevice.reset();
         View view = getView();
         if(view==null){
@@ -175,6 +205,7 @@ public class CompleteEnrolment extends Fragment {
             confirmButton.setEnabled(false);
         }
         viewButton.setEnabled(false);
+        companionDevice.setProtocolInError(103,"Enrolment Rejected by User");
         companionDevice.reset();
         GifDrawable drawable = (GifDrawable) ((GifImageView) view.findViewById(R.id.failed)).getDrawable();
         drawable.addAnimationListener(loopNumber -> {
@@ -193,7 +224,7 @@ public class CompleteEnrolment extends Fragment {
             IdentityStore identityStore = IdentityStore.getInstance();
             if (identityStore.hasPublicIdentity(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY))) {
                 showDuplicateError();
-                companionDevice.setProtocolInError();
+                companionDevice.setProtocolInError(101,"Duplicate Enrolment Attempt");
 
             }
         }

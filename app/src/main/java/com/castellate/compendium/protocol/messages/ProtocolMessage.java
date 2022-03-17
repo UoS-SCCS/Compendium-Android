@@ -1,3 +1,30 @@
+/*
+ *  © Copyright 2022. University of Surrey
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *
+ *  1. Redistributions of source code must retain the above copyright notice,
+ *  this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright notice,
+ *  this list of conditions and the following disclaimer in the documentation
+ *  and/or other materials provided with the distribution.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.castellate.compendium.protocol.messages;
 
 import static com.castellate.compendium.protocol.messages.Constants.ADR_PC;
@@ -9,6 +36,7 @@ import com.castellate.compendium.crypto.B64;
 import com.castellate.compendium.crypto.CompanionKeyManager;
 import com.castellate.compendium.crypto.CryptoException;
 import com.castellate.compendium.crypto.CryptoUtils;
+import com.castellate.compendium.protocol.error.ErrorProtocolMessage;
 import com.castellate.compendium.ws.WSMessages;
 
 import org.json.JSONException;
@@ -87,13 +115,25 @@ public abstract class ProtocolMessage {
         }
         if (EmbeddedEncryptedMessage.class.isAssignableFrom(getClassObj(protocolData))) {
             EmbeddedEncryptedMessage embedded = (EmbeddedEncryptedMessage) this;
-            ProtocolMessage protoMessage;
+            ProtocolMessage protoMessage=null;
             try {
                 protoMessage = (ProtocolMessage) embedded.getEncryptedMessageClass().newInstance();
                 protoMessage.prepareOutgoingMessage(protocolData);
                 msgData.put(embedded.getEncryptedMsgField(), encryptMessage(protoMessage, protocolData));
             } catch (IllegalAccessException | InstantiationException | JSONException e) {
                 throw new ProtocolMessageException("Exception creating embedded encrypted message", e);
+            } catch(ProtocolErrorPreKeyException e){
+                //Extra security check to make sure this is only an Error Message
+                if(ProtocolMessage.class.isAssignableFrom(ErrorProtocolMessage.class)) {
+                    Log.d(TAG, "Error trying to prepare error message, no derived key, will send in plaintext");
+                    if (protoMessage != null) {
+                        try {
+                            msgData.put("Error", protoMessage.msgData);
+                        } catch (JSONException jsonException) {
+                            Log.e(TAG, "Exception trying to send plaintext error");
+                        }
+                    }
+                }
             }
 
         }
@@ -243,7 +283,11 @@ public abstract class ProtocolMessage {
         }
     }
 
-    public JSONObject encryptMessage(ProtocolMessage protocolMessage, Map<String, String> protocolData) throws ProtocolMessageException {
+    public JSONObject encryptMessage(ProtocolMessage protocolMessage, Map<String, String> protocolData) throws ProtocolMessageException, ProtocolErrorPreKeyException {
+        if(protocolData.get(DERIVED_KEY) == null && ProtocolMessage.class.isAssignableFrom(ErrorProtocolMessage.class)){
+            Log.d(TAG,"Error before key derivation");
+            throw new ProtocolErrorPreKeyException("Cannot encrypt error message as the key is yet to be established");
+        }
         try {
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             SecretKeySpec secretKeySpec = CryptoUtils.getSecretKey(protocolData.get(DERIVED_KEY));

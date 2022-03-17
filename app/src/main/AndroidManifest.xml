@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.castellate.compendium" xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.castellate.compendium">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-feature android:name="android.hardware.camera.any" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -16,12 +19,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Compendium">
         <activity
+            android:name=".ui.splash.SplashActivity"
+            android:exported="true"
+            android:noHistory="true"
+            android:theme="@style/Theme.Compendium.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".ui.request.CompendiumRequestActivity"
             android:exported="false"
             android:label="@string/title_activity_compendium_request"
-            android:theme="@style/Theme.Compendium.NoActionBar"
-            android:parentActivityName=".MainActivity"/>
-        <!-- [START fcm_default_icon] -->
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.Compendium.NoActionBar" /> <!-- [START fcm_default_icon] -->
         <!--
  Set custom default icon. This is used when no icon is set for incoming notification messages.
              See README(https://goo.gl/l4GJaQ) for more.
@@ -54,15 +67,21 @@
             android:theme="@style/Theme.Compendium.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+
+                <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
             </intent-filter>
         </activity>
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
-            <meta-data  android:name="com.castellate.compendium.data.Config"
+            <meta-data
+                android:name="com.castellate.compendium.data.Config"
+                android:value="androidx.startup" />
+            <meta-data
+                android:name="com.castellate.compendium.data.IdentityStore"
                 android:value="androidx.startup" />
         </provider>
     </application>

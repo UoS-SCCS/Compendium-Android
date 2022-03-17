@@ -1,3 +1,30 @@
+/*
+ *  © Copyright 2022. University of Surrey
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *
+ *  1. Redistributions of source code must retain the above copyright notice,
+ *  this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright notice,
+ *  this list of conditions and the following disclaimer in the documentation
+ *  and/or other materials provided with the distribution.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.castellate.compendium.ui.request;
 
 import android.animation.Animator;
@@ -5,6 +32,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,15 +47,16 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.castellate.compendium.CompanionDevice;
 import com.castellate.compendium.R;
 import com.castellate.compendium.crypto.B64;
 import com.castellate.compendium.crypto.CompanionKeyManager;
 import com.castellate.compendium.crypto.CryptoException;
 import com.castellate.compendium.crypto.CryptoUtils;
 import com.castellate.compendium.data.IdentityStore;
-import com.castellate.compendium.exceptions.StorageException;
 import com.castellate.compendium.databinding.ConnectFragmentBinding;
 import com.castellate.compendium.exceptions.CompendiumException;
+import com.castellate.compendium.exceptions.StorageException;
 import com.castellate.compendium.protocol.Protocol;
 import com.castellate.compendium.protocol.ProtocolException;
 import com.castellate.compendium.protocol.core.CoreProtocol;
@@ -41,7 +70,6 @@ import com.castellate.compendium.protocol.core.res.CoreRegResMessage;
 import com.castellate.compendium.protocol.core.res.CoreVerifyResMessage;
 import com.castellate.compendium.protocol.messages.Constants;
 import com.castellate.compendium.protocol.messages.EncryptedMessage;
-import com.castellate.compendium.CompanionDevice;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import org.json.JSONException;
@@ -51,10 +79,14 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+
+import pl.droidsonroids.gif.GifDrawable;
+import pl.droidsonroids.gif.GifImageView;
 
 public class ConnectFragment extends Fragment {
     private static final String TAG = "ConnectFragment";
@@ -62,16 +94,45 @@ public class ConnectFragment extends Fragment {
     private CompanionDevice companionDevice;
     private CompanionKeyManager ckm;
     private boolean inError = false;
-    private boolean delayedError =false;
+    private boolean delayedError = false;
+    private boolean newKey = false;
+    private String appId = "";
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
             ckm = new CompanionKeyManager();
         } catch (CryptoException e) {
-            Log.d(TAG,"Exception loading CompanionKeyManager, will close",e);
-            delayedError=true;
+            Log.d(TAG, "Exception loading CompanionKeyManager, will close", e);
+            delayedError = true;
         }
+    }
+
+    private void checkAppExists() throws CompendiumException {
+        IdentityStore identityStore = IdentityStore.getInstance();
+        if (!identityStore.appExists(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY), companionDevice.getProtocolData(CoreGetReqMessage.Fields.APP_ID))) {
+            showGenericError("App ID not registered under PC key");
+            throw new CompendiumException("App ID not registered under PC key");
+        }
+    }
+
+    private void checkAppType(String type) throws CompendiumException {
+        IdentityStore identityStore = IdentityStore.getInstance();
+        String appType = identityStore.getAppType(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY), companionDevice.getProtocolData(CoreGetReqMessage.Fields.APP_ID));
+        if (appType.equals(type)) {
+            return;
+        }
+        showGenericError("App ID type does not match. Cannot process request");
+        throw new CompendiumException("App ID type does not match. Cannot process request");
+    }
+
+
+    private void addAppIfNotExists(String type) throws CompendiumException {
+        IdentityStore identityStore = IdentityStore.getInstance();
+        if (!identityStore.appExists(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY), companionDevice.getProtocolData(CoreGetReqMessage.Fields.APP_ID))) {
+            identityStore.addApp(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY), companionDevice.getProtocolData(CoreGetReqMessage.Fields.APP_ID), type);
+        }
+
     }
 
     private void processAwaitingUI(String protocolState) throws CompendiumException {
@@ -87,19 +148,31 @@ public class ConnectFragment extends Fragment {
                     String type = companionDevice.getProtocolData("type");
                     switch (type) {
                         case "Get":
+                            checkAppExists();
+                            checkAppType(Constants.TYPE_PUT_GET);
+                            this.newKey = ckm.isNewKey(getKeyId());
+
                             JSONObject obj = new JSONObject(companionDevice.getProtocolData(CoreGetReqMessage.Fields.ENC_DATA));
                             requestBiometric(prompt, ckm.getDecryptionCipher(getKeyId(), B64.decode(obj.getString(EncryptedMessage.IV))));
                             break;
                         case "Put":
+                            addAppIfNotExists(Constants.TYPE_PUT_GET);
+                            checkAppType(Constants.TYPE_PUT_GET);
+                            this.newKey = ckm.isNewKey(getKeyId());
                             requestBiometric(prompt, ckm.getEncryptionCipher(getKeyId()));
-
                             break;
                         case "Reg":
                             //Generate or get the public key
+                            addAppIfNotExists(Constants.TYPE_REG_SIGN);
+                            checkAppType(Constants.TYPE_REG_SIGN);
+                            this.newKey = ckm.isNewKey(getKeyId());
                             companionDevice.putInProtocolData(CoreRegResMessage.Fields.APP_PK, CryptoUtils.encodePublicKey(ckm.getPublicSigningKey(getKeyId())));
                             requestBiometric(prompt, ckm.getSignatureObject(getKeyId()));
                             break;
                         case "Verify":
+                            checkAppExists();
+                            checkAppType(Constants.TYPE_REG_SIGN);
+                            this.newKey = ckm.isNewKey(getKeyId());
                             requestBiometric(prompt, ckm.getSignatureObject(getKeyId()));
                             break;
                     }
@@ -116,20 +189,32 @@ public class ConnectFragment extends Fragment {
         }
     }
 
+    private void rollback(){
+        if (newKey) {
+            try {
+                ckm.cleanUpUnusedKey(getKeyId());
+                IdentityStore.getInstance().cleanUpUnusedApp(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY),appId);
+            }catch(CompendiumException e){
+                showGenericError("Exception cleaning up unused key");
+
+            }
+        }
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 
         binding = ConnectFragmentBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
-        if(delayedError){
-            showGenericError("Error during initialisation, will close",view);
+        if (delayedError) {
+            showGenericError("Error during initialisation, will close", view);
             return binding.getRoot();
         }
 
         SharedPreferences prefs = requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
-        if(prefs == null){
-            showGenericError("Invalid application settings - cannot get device ID",view);
+        if (prefs == null) {
+            showGenericError("Invalid application settings - cannot get device ID", view);
             return binding.getRoot();
         }
         view.findViewById(R.id.connect_ok_error_button).setOnClickListener(viewButton -> requireActivity().finishAffinity());
@@ -146,9 +231,12 @@ public class ConnectFragment extends Fragment {
                 if (status == Protocol.STATUS.AWAITING_UI) {
                     processAwaitingUI(protocolState);
                 }
-                ((CircularProgressIndicator) view.findViewById(R.id.progress_spinner_req)).setProgress(companionDevice.getProgress(), true);
+                if (status != Protocol.STATUS.IDLE) {
+                    ((CircularProgressIndicator) view.findViewById(R.id.progress_spinner_req)).setProgress(companionDevice.getProgress(), true);
+                }
                 if (status == Protocol.STATUS.FINISHED) {
                     Log.d(TAG, "Protocol finished will write out data");
+                    protocolFinished();
                 }
             } catch (CompendiumException e) {
                 Log.d(TAG, "Compendium exception", e);
@@ -158,6 +246,7 @@ public class ConnectFragment extends Fragment {
         requestViewModel.getProtocolState().observe(getViewLifecycleOwner(), state -> {
             Log.d(TAG, "State:" + state);
             ((TextView) view.findViewById(R.id.progress_status_req)).setText(state);
+
         });
 
         PushRequestSharedViewModel model = new ViewModelProvider(requireActivity()).get(PushRequestSharedViewModel.class);
@@ -177,6 +266,24 @@ public class ConnectFragment extends Fragment {
 
     }
 
+    private void protocolFinished() throws StorageException {
+        View view = getView();
+        Log.d(TAG, "Protocol finished will write out data");
+        companionDevice.reset();
+        GifDrawable drawable = (GifDrawable) ((GifImageView) Objects.requireNonNull(view).findViewById(R.id.req_complete)).getDrawable();
+        drawable.addAnimationListener(loopNumber -> {
+            final Handler handler = new Handler();
+            handler.postDelayed(() -> requireActivity().finishAffinity(), 1500);
+
+
+        });
+        //This must be called last as on completion of the animation the page will
+        //navigate away.
+        crossFade(view.findViewById(R.id.connect_preloader), view.findViewById(R.id.req_complete));
+
+
+    }
+
     private boolean canAuthenticateWithStrongBiometrics() {
         return BiometricManager.from(requireContext()).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS;
     }
@@ -189,11 +296,11 @@ public class ConnectFragment extends Fragment {
         Map<String, String> map = new HashMap<>();
         String type = companionDevice.getProtocolData("type");
         IdentityStore identityStore = IdentityStore.getInstance();
-        String deviceName = identityStore.getNameByKeyID(companionDevice.getProtocolData(Constants.PC_PUBLIC_KEY));
+        String deviceName = identityStore.getNameByKeyID(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY));
 
         switch (type) {
             case "Get": {
-                String appId = companionDevice.getProtocolData(CoreGetReqMessage.Fields.APP_ID);
+                appId = companionDevice.getProtocolData(CoreGetReqMessage.Fields.APP_ID);
                 String code = companionDevice.getProtocolData(CoreGetReqMessage.Fields.CODE);
                 String desc = companionDevice.getProtocolData(CoreGetReqMessage.Fields.DESC);
                 map.put("title", createTitleString(deviceName, appId, " requests access to its data."));
@@ -202,7 +309,7 @@ public class ConnectFragment extends Fragment {
             }
             break;
             case "Put": {
-                String appId = companionDevice.getProtocolData(CorePutReqMessage.Fields.APP_ID);
+                appId = companionDevice.getProtocolData(CorePutReqMessage.Fields.APP_ID);
                 String code = companionDevice.getProtocolData(CorePutReqMessage.Fields.CODE);
                 String desc = companionDevice.getProtocolData(CorePutReqMessage.Fields.DESC);
                 map.put("title", createTitleString(deviceName, appId, " requests permission to store data."));
@@ -211,14 +318,14 @@ public class ConnectFragment extends Fragment {
             }
             break;
             case "Reg": {
-                String appId = companionDevice.getProtocolData(CoreRegReqMessage.Fields.APP_ID);
+                appId = companionDevice.getProtocolData(CoreRegReqMessage.Fields.APP_ID);
                 String desc = companionDevice.getProtocolData(CoreRegReqMessage.Fields.DESC);
                 map.put("title", createTitleString(deviceName, appId, " requests permission to create a user verification key."));
                 map.put("subtitle", createSubtitleString(desc));
             }
             break;
             case "Verify": {
-                String appId = companionDevice.getProtocolData(CoreVerifyReqMessage.Fields.APP_ID);
+                appId = companionDevice.getProtocolData(CoreVerifyReqMessage.Fields.APP_ID);
                 String code = companionDevice.getProtocolData(CoreVerifyReqMessage.Fields.CODE);
                 String desc = companionDevice.getProtocolData(CoreRegReqMessage.Fields.DESC);
                 map.put("title", createTitleString(deviceName, appId, " requests a user verification."));
@@ -272,11 +379,11 @@ public class ConnectFragment extends Fragment {
 
     private BiometricPrompt.PromptInfo buildBiometricPrompt(String title, String subtitle, String description) {
         // Set prompt info
-        return  new BiometricPrompt.PromptInfo.Builder().setTitle(title).setSubtitle(subtitle).setDescription(description).setNegativeButtonText("Cancel").build();
+        return new BiometricPrompt.PromptInfo.Builder().setTitle(title).setSubtitle(subtitle).setDescription(description).setNegativeButtonText("Cancel").build();
     }
 
     private void fadeIn(View view) {
-        if(view == null){
+        if (view == null) {
             return;
         }
         view.setAlpha(0f);
@@ -289,7 +396,7 @@ public class ConnectFragment extends Fragment {
     }
 
     private void fadeOut(View view) {
-        if(view == null){
+        if (view == null) {
             return;
         }
         //view.setAlpha(1f);
@@ -309,7 +416,7 @@ public class ConnectFragment extends Fragment {
 
     private void crossFade(View fadeMeOut, View fadeMeIn) {
         fadeIn(fadeMeIn);
-        if(fadeMeOut!=null) {
+        if (fadeMeOut != null) {
             fadeMeOut.animate().alpha(0f).setDuration(100).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -324,23 +431,26 @@ public class ConnectFragment extends Fragment {
 
     private void showGenericError() {
         showGenericError(null);
+        companionDevice.setProtocolInError(100,"Unknown Error");
         companionDevice.reset();
     }
 
     private void showGenericError(String customText) {
-        showGenericError(customText,null);
+        showGenericError(customText, null);
     }
+
     private void showGenericError(String customText, View passedView) {
         if (inError) {
             return;
         }
-        if(companionDevice!=null) {
+        if (companionDevice != null) {
+            companionDevice.setProtocolInError(102,customText);
             companionDevice.reset();
         }
         View view;
-        if(passedView!=null){
+        if (passedView != null) {
             view = passedView;
-        }else {
+        } else {
             view = requireView();
         }
         this.inError = true;
@@ -374,6 +484,8 @@ public class ConnectFragment extends Fragment {
             public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                 Log.e(TAG, "Error code: " + errorCode + "error String: " + errString);
                 super.onAuthenticationError(errorCode, errString);
+                rollback();
+                companionDevice.setProtocolInError(104,"Biometric Authentication Failed or Rejected");
                 showGenericError("Biometric authentication failed");
             }
 
@@ -387,6 +499,8 @@ public class ConnectFragment extends Fragment {
             @Override
             public void onAuthenticationFailed() {
                 super.onAuthenticationFailed();
+                rollback();
+                companionDevice.setProtocolInError(104,"Biometric Authentication Failed or Rejected");
                 showGenericError("Biometric authentication failed");
             }
         };
@@ -421,7 +535,7 @@ public class ConnectFragment extends Fragment {
     }
 
     private void doSignature(Signature signature, String data) throws CryptoException {
-        if(signature==null){
+        if (signature == null) {
             throw new CryptoException("Null signature object");
         }
         try {
@@ -436,7 +550,7 @@ public class ConnectFragment extends Fragment {
     }
 
     private void doEncryption(Cipher cipher, String data) throws CryptoException {
-        if(cipher==null){
+        if (cipher == null) {
             throw new CryptoException("Null cipher object");
         }
         try {
@@ -455,7 +569,7 @@ public class ConnectFragment extends Fragment {
     }
 
     private void doDecryption(Cipher cipher, String encryptedData) throws CryptoException {
-        if(cipher==null){
+        if (cipher == null) {
             throw new CryptoException("Null cipher object");
         }
         try {

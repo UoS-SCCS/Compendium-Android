@@ -4,24 +4,34 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable-anydpi/ic_stat_ic_notification.xml" value="0.1935" />
+        <entry key="app/src/main/res/drawable/ic_computer.xml" value="0.1245" />
+        <entry key="app/src/main/res/drawable/ic_key_solid.xml" value="0.1245" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.186" />
         <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.186" />
         <entry key="app/src/main/res/drawable/ic_loader.xml" value="0.1205" />
+        <entry key="app/src/main/res/drawable/ic_notifications_24.xml" value="0.1245" />
         <entry key="app/src/main/res/drawable/ic_owl_logo_nonstop.xml" value="0.186" />
         <entry key="app/src/main/res/layout/activity_compendium_request.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_fullscreen_splash.xml" value="0.15760869565217392" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.18" />
+        <entry key="app/src/main/res/layout/activity_splash.xml" value="0.15760869565217392" />
         <entry key="app/src/main/res/layout/authenticate_fragment.xml" value="0.1671195652173913" />
         <entry key="app/src/main/res/layout/connect_fragment.xml" value="0.22" />
         <entry key="app/src/main/res/layout/content_compendium_request.xml" value="0.1671195652173913" />
         <entry key="app/src/main/res/layout/content_main.xml" value="0.1671195652173913" />
+        <entry key="app/src/main/res/layout/fragment_apps_item.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/fragment_apps_item_list.xml" value="0.15760869565217392" />
         <entry key="app/src/main/res/layout/fragment_complete_enrolment.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.22" />
         <entry key="app/src/main/res/layout/fragment_first2.xml" value="0.1671195652173913" />
+        <entry key="app/src/main/res/layout/fragment_keys_item.xml" value="0.15760869565217392" />
+        <entry key="app/src/main/res/layout/fragment_keys_item_list.xml" value="0.15760869565217392" />
         <entry key="app/src/main/res/layout/fragment_notification_item.xml" value="0.15760869565217392" />
         <entry key="app/src/main/res/layout/fragment_notification_item_list.xml" value="0.1671195652173913" />
         <entry key="app/src/main/res/layout/fragment_q_r_code.xml" value="0.1671195652173913" />
         <entry key="app/src/main/res/layout/fragment_second.xml" value="0.13177083333333334" />
         <entry key="app/src/main/res/layout/home_screen.xml" value="0.22" />
+        <entry key="app/src/main/res/menu/menu_main.xml" value="0.20052083333333334" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.186" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.186" />
       </map>
