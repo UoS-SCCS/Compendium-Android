@@ -33,12 +33,19 @@ import android.view.View;
 
 import java.util.Iterator;
 
+/**
+ * Concrete AnimAction to process fade in animations
+ */
 public class FadeAction extends AnimAction {
 
     public FadeAction(){
         super();
     }
 
+    /**
+     * Process the action by calling fade in on each of the elements, with last element to be
+     * triggered acting as the trigger for the next action call
+     */
     public void processAction(){
         Iterator<View> itr = items.iterator();
         while(itr.hasNext()){

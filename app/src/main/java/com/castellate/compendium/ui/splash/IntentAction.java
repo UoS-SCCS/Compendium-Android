@@ -34,11 +34,23 @@ import android.os.Handler;
 
 import com.castellate.compendium.R;
 
+/**
+ * Concrete AnimAction that instead of animation starts a new activity
+ */
 public class IntentAction extends AnimAction {
     private Context context;
     private Class<?> target;
     private long delay;
     private Activity activity;
+
+    /**
+     * Create a new Intent Action, specifying the activity and context to use and the target
+     * activity class to start
+     * @param activity current activity
+     * @param context current content
+     * @param target target class to start
+     * @param delay delay before starting it
+     */
     public IntentAction(Activity activity, Context context, Class<?> target, long delay){
         this.activity=activity;
         this.delay=delay;

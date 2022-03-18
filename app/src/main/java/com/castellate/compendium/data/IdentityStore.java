@@ -53,6 +53,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Identity store to store received public key. Note, unlike the Python implementation, this does
+ * not store any private credentials, which are all stored within the AndroidKeyStore.
+ *
+ * The data within the IdentityStore is stored in a JSON file that is written to the apps
+ * data folder, which should be protected by the OS from unauthorised access.
+ */
 public class IdentityStore implements Initializer<IdentityStore> {
     private static final String FILE_NAME = "identityStore.json";
     private static final String NAME_IDX = "names";
@@ -70,10 +77,18 @@ public class IdentityStore implements Initializer<IdentityStore> {
 
     }
 
+    /**
+     * Get an instance of IdentityStore
+     * @return IdentityStore instance
+     */
     public static IdentityStore getInstance() {
         return instance;
     }
 
+    /**
+     * Checks if the IdentityStore is initialised
+     * @return true if it is, false if not
+     */
     public boolean isInitialised() {
         return this.initialised;
     }
@@ -84,9 +99,18 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Reset the identity store by deleting all stored data
+     * @throws StorageException
+     */
     private synchronized  void resetStore()throws StorageException{
         createStructure();
     }
+
+    /**
+     * Create the basic empty structure of the identity store JSON
+     * @throws StorageException
+     */
     private synchronized void createStructure() throws StorageException {
         data = new JSONObject();
         try {
@@ -101,6 +125,11 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Initialise by loading the underlying data in the JSON file
+     * @param storageDirectory director where file is stored
+     * @throws StorageException
+     */
     public synchronized void init(File storageDirectory) throws StorageException {
         if (this.initialised) {
             return;
@@ -114,6 +143,10 @@ public class IdentityStore implements Initializer<IdentityStore> {
 
     }
 
+    /**
+     * Loads the data from the file
+     * @throws StorageException
+     */
     private synchronized void load() throws StorageException {
 
         BufferedReader br = null;
@@ -140,6 +173,10 @@ public class IdentityStore implements Initializer<IdentityStore> {
 
     }
 
+    /**
+     * Save the data to the file
+     * @throws StorageException
+     */
     private synchronized void store() throws StorageException {
         checkInitialised();
         FileWriter fw = null;
@@ -161,6 +198,13 @@ public class IdentityStore implements Initializer<IdentityStore> {
 
     }
 
+    /**
+     * Store a public key against a name and Public Key ID. This will calculate the Public Key ID
+     * from the key itself
+     * @param name name of the device
+     * @param key public key to store
+     * @throws StorageException
+     */
     public void storePublicIdentity(String name, ECPublicKey key) throws StorageException {
         checkInitialised();
         try {
@@ -172,6 +216,12 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Store a public key against a name, first converting the Base64 string into a public key
+     * @param name device name
+     * @param key public key as a Base64 string
+     * @throws StorageException
+     */
     public void storePublicIdentity(String name, String key) throws StorageException {
         checkInitialised();
         try {
@@ -182,6 +232,13 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Store the public key against the name and key id
+     * @param name device name
+     * @param key public key as Base64 string
+     * @param keyId public key ID
+     * @throws StorageException
+     */
     public synchronized void storePublicIdentity(String name, String key, String keyId) throws StorageException {
         checkInitialised();
         try {
@@ -194,6 +251,12 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Get a public key from the name
+     * @param name name to look up
+     * @return Base64 encoded public key or null if it doesn't exist
+     * @throws StorageException
+     */
     public String getPublicIdentityByName(String name) throws StorageException {
         checkInitialised();
         try {
@@ -208,6 +271,12 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Gets the name from the KeyID
+     * @param keyId key ID to look up
+     * @return name of associated device of null if it doesn't exist
+     * @throws StorageException
+     */
     public String getNameByKeyID(String keyId) throws StorageException {
         checkInitialised();
         try {
@@ -221,6 +290,12 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Get the public key from the key id
+     * @param keyId key ID to look up
+     * @return Base64 encoded public key or null if it doesn't exist
+     * @throws StorageException
+     */
     public String getPublicIdentityById(String keyId) throws StorageException {
         checkInitialised();
         try {
@@ -233,6 +308,13 @@ public class IdentityStore implements Initializer<IdentityStore> {
             throw new StorageException("Exception reading key by id", e);
         }
     }
+
+    /**
+     * Get a keys name the AppIDs associated with a Key ID
+     * @param keyId key ID to look up
+     * @return list of AppItems associated with the Key ID
+     * @throws StorageException
+     */
     public List<AppItem> getKeyNameAppEntries(String keyId) throws StorageException {
         checkInitialised();
         try {
@@ -250,6 +332,12 @@ public class IdentityStore implements Initializer<IdentityStore> {
             throw new StorageException("Exception getting names", e);
         }
     }
+
+    /**
+     * Get the list of names stored
+     * @return List of KeyItems
+     * @throws StorageException
+     */
     public List<KeyItem> getKeyNameEntries() throws StorageException {
         checkInitialised();
         try {
@@ -266,6 +354,12 @@ public class IdentityStore implements Initializer<IdentityStore> {
             throw new StorageException("Exception getting names", e);
         }
     }
+
+    /**
+     * Get the names of the keys stored
+     * @return List of names
+     * @throws StorageException
+     */
     public List<String> getKeyNames() throws StorageException {
         checkInitialised();
         try {
@@ -280,6 +374,11 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Get the key IDs stored
+     * @return
+     * @throws StorageException
+     */
     public List<String> getKeyIds() throws StorageException {
         checkInitialised();
         try {
@@ -293,6 +392,12 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Convert a JSONArray to a Java List
+     * @param arr JSONArray to convert
+     * @return List of strings that were in the JSON Array
+     * @throws JSONException
+     */
     private List<String> convertJSONArrayToList(JSONArray arr) throws JSONException {
         List<String> list = new ArrayList<>();
         for (int i = 0; i < arr.length(); i++) {
@@ -301,6 +406,11 @@ public class IdentityStore implements Initializer<IdentityStore> {
         return list;
     }
 
+    /**
+     * Get the device name
+     * @return name of device
+     * @throws StorageException
+     */
     public String getName() throws StorageException {
         checkInitialised();
         try {
@@ -310,6 +420,11 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Set the device name
+     * @param name name of the device
+     * @throws StorageException
+     */
     public void setName(String name) throws StorageException {
         checkInitialised();
         try {
@@ -321,6 +436,12 @@ public class IdentityStore implements Initializer<IdentityStore> {
     }
 
 
+    /**
+     * Do we have a public key for this particular key ID
+     * @param keyId key ID to check
+     * @return true if we do, false it not
+     * @throws StorageException
+     */
     public boolean hasPublicIdentity(String keyId) throws StorageException {
         checkInitialised();
         try {
@@ -330,6 +451,14 @@ public class IdentityStore implements Initializer<IdentityStore> {
         }
     }
 
+    /**
+     * Gets a JSONObject from the passed in JSONObject, used as an internal method to better
+     * handle exception
+     * @param obj JSONObject to try to retrieve a JSONObject from
+     * @param key field name to retrieve JSONObject from
+     * @return JSONObject
+     * @throws StorageException
+     */
     private JSONObject getJsonObject(JSONObject obj, String key) throws StorageException {
         try {
             JSONObject result = obj.getJSONObject(key);
@@ -343,10 +472,22 @@ public class IdentityStore implements Initializer<IdentityStore> {
 
     }
 
+    /**
+     * Get the APPs associated with this device
+     * @return JSONObject of apps
+     * @throws StorageException
+     */
     public JSONObject getApps() throws StorageException {
         return getJsonObject(this.data, APPS);
     }
 
+    /**
+     * Check if an app exists
+     * @param keyId keyID to check under
+     * @param appId appID to check
+     * @return true if it does, false it not
+     * @throws StorageException
+     */
     public boolean appExists(String keyId, String appId) throws StorageException {
         JSONObject apps = getApps();
         if (apps.has(keyId)) {
@@ -357,6 +498,13 @@ public class IdentityStore implements Initializer<IdentityStore> {
         return false;
     }
 
+    /**
+     * Get the app type
+     * @param keyId key ID the appID is under
+     * @param appId appID to check
+     * @return app type
+     * @throws StorageException
+     */
     public String getAppType(String keyId, String appId) throws StorageException {
         try {
             JSONObject apps = getApps();
@@ -375,11 +523,24 @@ public class IdentityStore implements Initializer<IdentityStore> {
         throw new StorageException("Missing keyId or appId");
     }
 
+    /**
+     * Get the apps associated with a particular KeyID
+     * @param keyId key ID to get
+     * @return JSONObject of associated apps
+     * @throws StorageException
+     */
     public JSONObject getKeyApps(String keyId) throws StorageException {
         JSONObject apps = getApps();
         return getJsonObject(apps, keyId);
     }
 
+    /**
+     * Add an appID to the store
+     * @param keyId KeyID to store the app under
+     * @param appId AppID to store
+     * @param type type of the app
+     * @throws StorageException
+     */
     public void addApp(String keyId, String appId, String type) throws StorageException {
 
         try {
@@ -429,6 +590,13 @@ public class IdentityStore implements Initializer<IdentityStore> {
         return new ArrayList<>();
     }
 
+    /**
+     * Cleanup an unused app after optimistically creating it during key generation, i.e. when a
+     * user rejects an app request
+     * @param keyId keyID to app is under
+     * @param appId AppID to remove
+     * @throws StorageException
+     */
     public void cleanUpUnusedApp(String keyId, String appId) throws StorageException {
         JSONObject apps = getApps();
         if (!apps.has(keyId)) {
@@ -442,6 +610,10 @@ public class IdentityStore implements Initializer<IdentityStore> {
 
     }
 
+    /**
+     * Reset the store deleting all data
+     * @throws StorageException
+     */
     public void reset() throws StorageException {
         resetStore();
     }

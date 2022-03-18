@@ -38,6 +38,9 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.castellate.compendium.databinding.FragmentSecondBinding;
 
+/**
+ * Not currently implemented
+ */
 public class SecondFragment extends Fragment {
 
     private FragmentSecondBinding binding;

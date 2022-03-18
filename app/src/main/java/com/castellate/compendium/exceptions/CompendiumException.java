@@ -27,6 +27,7 @@
 
 package com.castellate.compendium.exceptions;
 
+
 public class CompendiumException extends Exception{
     public CompendiumException() {
     }

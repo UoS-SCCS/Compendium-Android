@@ -88,6 +88,10 @@ import javax.crypto.IllegalBlockSizeException;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
+/**
+ * UI Fragment that display the actions and updates associated with a Push Notification and
+ * the subsequent protocol that gets run
+ */
 public class ConnectFragment extends Fragment {
     private static final String TAG = "ConnectFragment";
     private ConnectFragmentBinding binding;
@@ -108,6 +112,11 @@ public class ConnectFragment extends Fragment {
         }
     }
 
+    /**
+     * Checks that a particular application ID exists under the PCs key
+     *
+     * @throws CompendiumException if the AppID is not registered under the PCs key
+     */
     private void checkAppExists() throws CompendiumException {
         IdentityStore identityStore = IdentityStore.getInstance();
         if (!identityStore.appExists(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY), companionDevice.getProtocolData(CoreGetReqMessage.Fields.APP_ID))) {
@@ -116,6 +125,12 @@ public class ConnectFragment extends Fragment {
         }
     }
 
+    /**
+     * Checks that the registered type of the App is consistent with what is being requested, i.e.
+     * you cannot request a PUT using a Verification AppID
+     * @param type type of application
+     * @throws CompendiumException
+     */
     private void checkAppType(String type) throws CompendiumException {
         IdentityStore identityStore = IdentityStore.getInstance();
         String appType = identityStore.getAppType(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY), companionDevice.getProtocolData(CoreGetReqMessage.Fields.APP_ID));
@@ -127,6 +142,11 @@ public class ConnectFragment extends Fragment {
     }
 
 
+    /**
+     * If the AppID doesn't exist add it
+     * @param type type of AppID to create
+     * @throws CompendiumException
+     */
     private void addAppIfNotExists(String type) throws CompendiumException {
         IdentityStore identityStore = IdentityStore.getInstance();
         if (!identityStore.appExists(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY), companionDevice.getProtocolData(CoreGetReqMessage.Fields.APP_ID))) {
@@ -135,6 +155,12 @@ public class ConnectFragment extends Fragment {
 
     }
 
+    /**
+     * The underlying protocol is awaiting a UI response, determine what that is and process it
+     *
+     * @param protocolState state of the protocol
+     * @throws CompendiumException
+     */
     private void processAwaitingUI(String protocolState) throws CompendiumException {
 
         try {
@@ -189,6 +215,13 @@ public class ConnectFragment extends Fragment {
         }
     }
 
+    /**
+     * Rolls back an added key. This is required because there is no user verification required to
+     * add a key to the keystore. However, we want a biometric authentication that the user wants
+     * to add that key and use it. To do this, we optimistically create the key, then attempt to use
+     * the key, which will trigger a biometric prompt.If the user rejects that prompt we call this
+     * rollback method to delete the newly created key.
+     */
     private void rollback(){
         if (newKey) {
             try {
@@ -266,6 +299,15 @@ public class ConnectFragment extends Fragment {
 
     }
 
+    /**
+     * The protocol is finished so show the finished animation and close the activity. We close the
+     * activity without user input because we want the processing of notification to require the
+     * minimum amount of user interaction, so it is just, tap notification, tap fingerprint to
+     * approve or press reject, then it returns the user to whatever they were doing at the time
+     * the notification was read.
+     *
+     * @throws StorageException
+     */
     private void protocolFinished() throws StorageException {
         View view = getView();
         Log.d(TAG, "Protocol finished will write out data");
@@ -284,14 +326,35 @@ public class ConnectFragment extends Fragment {
 
     }
 
+    /**
+     * Checks if we have the capability to perform biometric authentication
+     * @return true if we can, false if not
+     */
     private boolean canAuthenticateWithStrongBiometrics() {
         return BiometricManager.from(requireContext()).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS;
     }
 
+    /**
+     * Gets the Public Key ID of the PC and appends it AppID to create a unique key for the
+     * AndroidKeyStore. We have to do this because we don't have hierarchical storage in the
+     * keystore and AppID are not globally unique, but they are unique within a Key, so we combine
+     * the two to create a globally unique identifier
+     *
+     * TODO externalise field name
+     * @return concatenation of Public Key ID ":" and APP ID
+     */
     private String getKeyId() {
         return companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY) + ":" + companionDevice.getProtocolData("app_id");
     }
 
+    /**
+     * Prepares the biometric prompt text based on the type of message that was received
+     *
+     * (TODO) NOTE there is a bug in Android 12 that causes the text to not wrap.
+     *
+     * @return Map of the fields and their values
+     * @throws StorageException
+     */
     private Map<String, String> preparePromptText() throws StorageException {
         Map<String, String> map = new HashMap<>();
         String type = companionDevice.getProtocolData("type");
@@ -338,7 +401,13 @@ public class ConnectFragment extends Fragment {
         return map;
     }
 
-
+    /**
+     * Creates a title string
+     * @param deviceName name of device making the request
+     * @param appId AppID being requested
+     * @param request what the request is
+     * @return concatenated string
+     */
     private String createTitleString(String deviceName, String appId, String request) {
         return appId + " on " + deviceName + request;
     }
@@ -363,6 +432,12 @@ public class ConnectFragment extends Fragment {
         binding = null;
     }
 
+    /**
+     * Requests access to a cipher object (symmetric key) protected by a biometric. This will show
+     * the biometric prompt and ask the user to approve
+     * @param prompt biometric prompt to show
+     * @param cipher Cipher object to access
+     */
     private void requestBiometric(BiometricPrompt.PromptInfo prompt, Cipher cipher) {
         BiometricPrompt.AuthenticationCallback authenticationCallback = getAuthenticationCallback();
         ContextCompat.getMainExecutor(requireActivity());
@@ -370,6 +445,12 @@ public class ConnectFragment extends Fragment {
         mBiometricPrompt.authenticate(prompt, new BiometricPrompt.CryptoObject(cipher));
     }
 
+    /**
+     * Requests access to a signature object (EC Private Key) protected by a biometric. This will
+     * show the biometric prompt and ask the user to approve
+     * @param prompt biometric prompt to show
+     * @param signature Signature object to access
+     */
     private void requestBiometric(BiometricPrompt.PromptInfo prompt, Signature signature) {
         BiometricPrompt.AuthenticationCallback authenticationCallback = getAuthenticationCallback();
         ContextCompat.getMainExecutor(requireActivity());
@@ -377,11 +458,22 @@ public class ConnectFragment extends Fragment {
         mBiometricPrompt.authenticate(prompt, new BiometricPrompt.CryptoObject(signature));
     }
 
+    /**
+     * Builds a biometric prompt
+     * @param title title to show
+     * @param subtitle subtitle to show
+     * @param description description to show
+     * @return Biometric PromptInfo to show
+     */
     private BiometricPrompt.PromptInfo buildBiometricPrompt(String title, String subtitle, String description) {
         // Set prompt info
         return new BiometricPrompt.PromptInfo.Builder().setTitle(title).setSubtitle(subtitle).setDescription(description).setNegativeButtonText("Cancel").build();
     }
 
+    /**
+     * Fades a view in over a period of 100ms having set it transparent and VISIBLE
+     * @param view view to fade
+     */
     private void fadeIn(View view) {
         if (view == null) {
             return;
@@ -395,12 +487,14 @@ public class ConnectFragment extends Fragment {
 
     }
 
+    /**
+     * Fades out a view over a period of 100ms and then set it as GONE in the UI
+     * @param view view to fade out
+     */
     private void fadeOut(View view) {
         if (view == null) {
             return;
         }
-        //view.setAlpha(1f);
-        //view.setVisibility(View.VISIBLE);
 
         // Animate the content view to 100% opacity, and clear any animation
         // listener set on the view.
@@ -414,6 +508,12 @@ public class ConnectFragment extends Fragment {
 
     }
 
+    /**
+     * Cross fade two views, fading one out, whilst fading another in over 100ms, useful when
+     * overlaying images
+     * @param fadeMeOut view to fade out
+     * @param fadeMeIn view to fade in
+     */
     private void crossFade(View fadeMeOut, View fadeMeIn) {
         fadeIn(fadeMeIn);
         if (fadeMeOut != null) {
@@ -429,16 +529,28 @@ public class ConnectFragment extends Fragment {
 
     }
 
+    /**
+     * Show a generic error message and set the protocol as in error
+     */
     private void showGenericError() {
         showGenericError(null);
         companionDevice.setProtocolInError(100,"Unknown Error");
         companionDevice.reset();
     }
 
+    /**
+     * Show a generic error message with a custom message
+     * @param customText
+     */
     private void showGenericError(String customText) {
         showGenericError(customText, null);
     }
 
+    /**
+     * Show a generic error with custom text message and update the view to show the error image
+     * @param customText error message
+     * @param passedView view to show error image
+     */
     private void showGenericError(String customText, View passedView) {
         if (inError) {
             return;
@@ -477,6 +589,11 @@ public class ConnectFragment extends Fragment {
 
     }
 
+    /**
+     * Gets a biometric authentication callback object that will receive the result of biometric
+     * prompt
+     * @return the callback object
+     */
     private BiometricPrompt.AuthenticationCallback getAuthenticationCallback() {
         // Callback for biometric authentication result
         return new BiometricPrompt.AuthenticationCallback() {
@@ -506,6 +623,10 @@ public class ConnectFragment extends Fragment {
         };
     }
 
+    /**
+     * If the biometric prompt is successful process the now available crypto object
+     * @param cryptoObject
+     */
     private void processCrypto(BiometricPrompt.CryptoObject cryptoObject) {
         try {
             String type = companionDevice.getProtocolData("type");
@@ -534,6 +655,12 @@ public class ConnectFragment extends Fragment {
 
     }
 
+    /**
+     * Perform a signature using the biometric authorised Signature object
+     * @param signature Signature object that is authorised for use
+     * @param data data to be signed
+     * @throws CryptoException
+     */
     private void doSignature(Signature signature, String data) throws CryptoException {
         if (signature == null) {
             throw new CryptoException("Null signature object");
@@ -549,6 +676,12 @@ public class ConnectFragment extends Fragment {
         }
     }
 
+    /**
+     * Perform an encryption with the authorised Cipher object
+     * @param cipher authorised Cipher object
+     * @param data data to encrypt
+     * @throws CryptoException
+     */
     private void doEncryption(Cipher cipher, String data) throws CryptoException {
         if (cipher == null) {
             throw new CryptoException("Null cipher object");
@@ -568,6 +701,12 @@ public class ConnectFragment extends Fragment {
         }
     }
 
+    /**
+     * Perform a decryption using the now authorised Cipher object
+     * @param cipher authorised cipher object
+     * @param encryptedData data to be decrypted, containing IV and cipher text
+     * @throws CryptoException
+     */
     private void doDecryption(Cipher cipher, String encryptedData) throws CryptoException {
         if (cipher == null) {
             throw new CryptoException("Null cipher object");

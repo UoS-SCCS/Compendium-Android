@@ -50,17 +50,35 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * Represents a Companion Device, handles protocol and web socket client management
+ */
 public class CompanionDevice {
     private static final String TAG = "CompanionDevice";
-    private WebSocketClient mWebSocketClient;
-    private Protocol currentProtocol = null;
     private final String id;
+
+    //Temporary buffer to hold outgoing messages until the web socket client is initialised
     private final Queue<String> bufferedQueue = new ConcurrentLinkedQueue<>();
 
+    private WebSocketClient mWebSocketClient;
+    private Protocol currentProtocol = null;
+    private boolean errorMessagePrepared = false;
+
+    /**
+     * Construct a new Companion Device with the specified companionId
+     * @param companionId name of the Companion Device
+     */
     public CompanionDevice(String companionId) {
         id = companionId;
     }
 
+    /**
+     * Runs the specified Protocol on this CompanionDevice, only one protocol can be run at
+     * a time.
+     *
+     * @param protocol protocol to be run
+     * @throws ProtocolException thrown if a protocol is already running
+     */
     public void runProtocol(Protocol protocol) throws ProtocolException {
         if (currentProtocol != null) {
             throw new ProtocolException("Existing protocol running, stop first");
@@ -73,6 +91,13 @@ public class CompanionDevice {
         initWebSocketClient();
     }
 
+    /**
+     * Sends the specified message, queuing it in a buffer if the web socket client is not
+     * yet initialise. As such, this does not guarantee immediate send, however, it will maintain
+     * the ordering of messages sent via this method.
+     *
+     * @param message message to send
+     */
     private void sendWSSMessage(String message) {
         if (message == null) {
             Log.d(TAG, "Null send message, assume dummy, will ignore");
@@ -88,6 +113,11 @@ public class CompanionDevice {
         }
     }
 
+    /**
+     * Get the progress of the current protocol, which will be calculated via the current
+     * state.
+     * @return progress as a percentage
+     */
     public int getProgress() {
         if (currentProtocol == null) {
             return 0;
@@ -95,6 +125,9 @@ public class CompanionDevice {
         return currentProtocol.getProgress();
     }
 
+    /**
+     * Clears the current message queue by polling to send the oldest first
+     */
     private synchronized void clearQueue() {
         String msgToSend;
         Log.d(TAG, "Clearing Queue");
@@ -104,6 +137,11 @@ public class CompanionDevice {
         }
     }
 
+    /**
+     * Get the string representation of the current state of the running protocol or the string
+     * "Null" if no protocol is running
+     * @return current state of the protocol or the string "Null"
+     */
     public String getCurrentStateOfProtocol() {
         if (currentProtocol != null) {
             return currentProtocol.getProtocolStateString();
@@ -112,6 +150,12 @@ public class CompanionDevice {
         }
     }
 
+    /**
+     * Puts the specified key-value pair into the underlying Protocol data associated with
+     * the currently running protocol. This will overwrite any existing data.
+     * @param key name
+     * @param value value
+     */
     public void putInProtocolData(String key, String value) {
         if (currentProtocol != null) {
             currentProtocol.putInProtocolData(key, value);
@@ -119,28 +163,43 @@ public class CompanionDevice {
 
     }
 
+    /**
+     * Triggers the protocol to continue after it has been waiting for a UI update. This does
+     * not pass any additional data to the protocol
+     */
     public void updateFromUI() {
         updateFromUI(null);
     }
-    public void reset(){
-        Log.d(TAG,"Resetting Companion Device");
-        if(this.currentProtocol!=null) {
+
+    public void reset() {
+        Log.d(TAG, "Resetting Companion Device");
+        if (this.currentProtocol != null) {
             this.currentProtocol.cleanUp();
             this.currentProtocol = null;
         }
 
         bufferedQueue.clear();
-        if(this.mWebSocketClient.isOpen()){
-            Log.d(TAG,"WebSocket Client is still open will try to close");
-            if(!this.mWebSocketClient.isClosing()) {
+        if (this.mWebSocketClient.isOpen()) {
+            Log.d(TAG, "WebSocket Client is still open will try to close");
+            if (!this.mWebSocketClient.isClosing()) {
                 this.mWebSocketClient.close();
             }
         }
-        if(this.mWebSocketClient.isClosed()){
-            Log.d(TAG,"WebSocket Client is Closed");
+        if (this.mWebSocketClient.isClosed()) {
+            Log.d(TAG, "WebSocket Client is Closed");
         }
 
     }
+
+    /**
+     * Triggers an update from the UI with the provided data being added into the Protocol Data
+     * first. This should be used when waiting for some UI action, like a biometric approval or
+     * signature. Those actions happen within the UI framework and when complete they should
+     * call this method to pass that newly created data back to the protocol so that it can
+     * continue processing messages
+     *
+     * @param newData key-value data to add to the Protocol Data
+     */
     public void updateFromUI(Map<String, String> newData) {
         if (newData != null) {
             currentProtocol.putAllInProtocolData(newData);
@@ -161,20 +220,29 @@ public class CompanionDevice {
 
         } catch (ProtocolMessageException e) {
             Log.e(TAG, "Exception preparing message", e);
-            if(this.currentProtocol!=null){
+            if (this.currentProtocol != null) {
                 this.currentProtocol.setErrorStatus();
             }
 
         }
     }
 
+    /**
+     * Process an incoming protocol message formatted as JSON object
+     *
+     * If no protocol is active the message is ignored
+     *
+     * @param msg JSONObject containing the message to be processed
+     */
     public void processMessage(JSONObject msg) {
         if (currentProtocol == null || msg == null) {
             return;
         }
-
+        //process the message and decide the what to do next
         switch (currentProtocol.parseIncomingMessage(msg)) {
             case READY_TO_SEND:
+                //We have completed processing on the incoming message and its corresponding reply
+                //and we are ready to send
                 sendWSSMessage(currentProtocol.getNextMessage());
 
                 currentProtocol.messageSent();
@@ -184,9 +252,11 @@ public class CompanionDevice {
                 }
                 break;
             case AWAITING_UI:
+                //We need something from the UI before we can process the outgoing message
                 Log.d(TAG, "Awaiting UI");
                 break;
             case AWAITING_RESPONSE:
+                //We have sent a message and are now awaiting a response
                 Log.d(TAG, "Awaiting response");
                 break;
             case IDLE:
@@ -195,6 +265,11 @@ public class CompanionDevice {
 
     }
 
+    /**
+     * Gets a particular value from the Protocol Data
+     * @param field name of field to retrieve
+     * @return value of that field or "" if no protocol is running
+     */
     public String getProtocolData(String field) {
         if (currentProtocol != null) {
             return currentProtocol.getProtocolData(field);
@@ -203,44 +278,67 @@ public class CompanionDevice {
         }
     }
 
+    /**
+     * TODO Check if we can combine this with other processMessage, in particular why do we not need the response?
+     * @param msg message to process
+     */
     public void processMessage(String msg) {
         if (currentProtocol != null) {
             currentProtocol.parseIncomingMessage(msg);
         }
     }
-    private boolean errorMessagePrepared=false;
-    public void setProtocolInError(int errorCode, String errorMessage){
-        if(currentProtocol!=null){
-            if(!errorMessagePrepared) {
+
+    /**
+     * Sets the protocol to be in a state of error causing it to try ot send an error message
+     * to the requester
+     * @param errorCode error code
+     * @param errorMessage error message
+     */
+    public void setProtocolInError(int errorCode, String errorMessage) {
+        if (currentProtocol != null) {
+            if (!errorMessagePrepared) {
                 String errorMsg = currentProtocol.prepareErrorMessage(errorCode, errorMessage);
                 if (errorMsg != null) {
                     this.sendWSSMessage(errorMsg);
                 }
-                errorMessagePrepared=true;
+                errorMessagePrepared = true;
             }
             currentProtocol.setErrorStatus();
         }
     }
 
-    public void setProtocolInError(){
-        setProtocolInError(100,"Unknown Error");
+    /**
+     * Sets the protocol to be in error with a generic unknown error, ideally call
+     * setProtocolInError with error code and error message.
+     */
+    public void setProtocolInError() {
+        setProtocolInError(100, "Unknown Error");
     }
+
+    /**
+     * Set the view model to use for the protocol. This view model will receive updates
+     * on the progress of the protocol allowing the UI to be updated
+     * @param model view model to use
+     */
     public void setProtocolViewModel(ProtocolViewModel model) {
         if (currentProtocol != null) {
             currentProtocol.setProtocolViewModel(model);
         }
     }
 
+    /**
+     * Initialise the web socket client
+     */
     public void initWebSocketClient() {
         URI uri;
         try {
+            //TODO externalise this string to a config file
             uri = new URI("wss://compendium.dev.castellate.com:8001");
         } catch (URISyntaxException e) {
-            Log.d(TAG,"WebSocketClient exception",e);
-            if(this.currentProtocol!=null){
+            Log.d(TAG, "WebSocketClient exception", e);
+            if (this.currentProtocol != null) {
                 this.currentProtocol.setErrorStatus();
             }
-
             return;
         }
         mWebSocketClient = new WebSocketClient(uri, new Draft_6455()) {
@@ -283,7 +381,7 @@ public class CompanionDevice {
 
             @Override
             public void onError(Exception e) {
-                if(currentProtocol!=null){
+                if (currentProtocol != null) {
                     currentProtocol.setErrorStatus();
                 }
                 Log.d(TAG, "WebSocket Error", e);

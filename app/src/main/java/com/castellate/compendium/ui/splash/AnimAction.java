@@ -33,14 +33,30 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Abstract class that defines an animation action. This will perform an animation on a view and
+ * then call the next action if one has been configured. Actions can also be IntentAction to
+ * start a new activity
+ */
 public abstract class AnimAction {
     protected List<View> items = new ArrayList<>();
     protected AnimAction nextAction;
     protected long runtime;
     public abstract void processAction();
+
+    /**
+     * Fade the view in and don't wait for the result
+     * @param view view to fade
+     */
     protected void fadeIn(View view) {
         fadeIn(view,null);
     }
+
+    /**
+     * Fade the view in and receive notification that it has finished
+     * @param view view to fade
+     * @param listener listener to receive complete notification
+     */
     protected void fadeIn(View view, AnimatorListenerAdapter listener) {
         if (view == null) {
             return;
@@ -52,9 +68,20 @@ public abstract class AnimAction {
         // listener set on the view.
         view.animate().alpha(1f).setDuration(runtime).setListener(listener);
     }
+
+    /**
+     * Add a view to this action, i.e. another view to be faded at the same time
+     * @param view View to add
+     */
     public void addViewToAction(View view){
         items.add(view);
     }
+
+    /**
+     * Sets the next action to call once this one is complete
+     * @param next the next AnimAction to call
+     * @param runtime how long an animation should take before calling the next action
+     */
     public void setNextAction(AnimAction next, long runtime){
         this.runtime=runtime;
         this.nextAction=next;

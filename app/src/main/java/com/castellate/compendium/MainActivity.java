@@ -55,13 +55,16 @@ import com.castellate.compendium.databinding.ActivityMainBinding;
 import com.castellate.compendium.exceptions.StorageException;
 import com.castellate.compendium.push.PushServerManager;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Objects;
 
+/**
+ * Main Activity for running the app, this is the activity
+ * that will be run when opening the application
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    //Setup some permissions
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final int CAMERA_REQUEST_CODE = 10;
     private AppBarConfiguration appBarConfiguration;
@@ -70,11 +73,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try {
-            URL url = new URL("https://compendium.dev.castellate.com:4500/register");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         boolean errorOccurred = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -85,24 +83,17 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH));
         }
 
-
-    try {
-        CompanionKeyManager ckm = new CompanionKeyManager();
-        Log.d(TAG, "Keys:" + ckm.getKeyList());
-
-    }catch(Exception e){
-        e.printStackTrace();
-    }
+        //Check we have access to an IdentityStore
         IdentityStore identityStore = IdentityStore.getInstance();
-        if(!identityStore.isInitialised()){
-            Log.d(TAG,"Unable to access Identity Store, will stop");
+        if (!identityStore.isInitialised()) {
+            Log.d(TAG, "Unable to access Identity Store, will stop");
             AlertDialog.Builder builder;
             builder = new AlertDialog.Builder(this);
             builder.setTitle("Error Loading");
             builder.setMessage("The app is unable to access the identity store and will close.");
             builder.setPositiveButton("OK", (dialogInterface, i) -> finish());
             builder.show();
-            errorOccurred=true;
+            errorOccurred = true;
         }
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -111,53 +102,22 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(binding.toolbar);
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_main);
         NavController navController = Objects.requireNonNull(navHostFragment).getNavController();
-        //NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
-        if(errorOccurred){
+        //If an error has occurred then stop any further setup because we will close
+        if (errorOccurred) {
             return;
         }
-        // If a notification message is tapped, any data accompanying the notification
-        // message is available in the intent extras. In this sample the launcher
-        // intent is fired when the notification is tapped, so any accompanying data would
-        // be handled here. If you want a different intent fired, set the click_action
-        // field of the notification message to the desired intent. The launcher intent
-        // is used when no click_action is specified.
-        //
-        // Handle possible data accompanying notification message.
-        // [START handle_data_extras]
-        if (getIntent().getExtras() != null) {
-            for (String key : getIntent().getExtras().keySet()) {
-                Object value = getIntent().getExtras().get(key);
-                Log.d(TAG, "Key: " + key + " Value: " + value);
-            }
-        }
+
+        //Setup the PushServer Manager and check the device is registered
         PushServerManager.checkRegistered(getApplicationContext());
+
+        //Check Camera permissions
         if (!hasCameraPermission()) {
             this.requestPermission();
         }
 
-        /**
-         * This shouldn't be needed because the notification service will receive the token
-         * refresh call and we can update from there.
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-            @Override
-            public void onComplete(@NonNull Task<String> task) {
-                if (!task.isSuccessful()) {
-                    Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-                    return;
-                }
-
-                // Get new FCM registration token
-                String token = task.getResult();
-
-                // Log and toast
-                String msg = getString(R.string.msg_token_fmt, token);
-                Log.d(TAG, msg);
-                //Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
-            }
-        });*/
     }
 
     @Override
@@ -177,20 +137,29 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        }else if(id == R.id.action_reset) {
+        } else if (id == R.id.action_reset) {
             AlertDialog.Builder builder;
             builder = new AlertDialog.Builder(this);
             builder.setTitle("Reset App");
             builder.setMessage("Are you sure you want to reset the app? This will delete all keys and identity information?");
             builder.setPositiveButton("Yes", (dialogInterface, i) -> resetApp());
-            builder.setNegativeButton("No",null);
+            builder.setNegativeButton("No", null);
             builder.show();
 
         }
 
         return super.onOptionsItemSelected(item);
     }
-    public void resetApp(){
+
+    /**
+     * Reset the app, clearing all keys both local and received
+     *
+     * This cannot be undone - ensure the user is warned of that before
+     * proceeding with this call
+     *
+     * TODO externalise string in error messages
+     */
+    public void resetApp() {
         try {
             CompanionKeyManager ckm = new CompanionKeyManager();
             ckm.reset();
@@ -210,16 +179,24 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("Ok", null);
         builder.show();
     }
+
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp();
     }
 
+    /**
+     * Checks for camera permissions
+     * @return true if we have permission, false if not
+     */
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Requests permission to use the camera from the user
+     */
     private void requestPermission() {
         ActivityCompat.requestPermissions(this, CAMERA_PERMISSION, CAMERA_REQUEST_CODE
 

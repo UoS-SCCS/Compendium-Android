@@ -45,6 +45,9 @@ import com.castellate.compendium.databinding.ActivityCompendiumRequestBinding;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Activity for processing incoming push message requests
+ */
 public class CompendiumRequestActivity extends AppCompatActivity {
 
     private static final String TAG = "CompendiumRequestActivity";

@@ -37,11 +37,21 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ * Web Socket Message procesing
+ */
 public class WSMessages {
+    //Constants for Web Socket Messages
     public static final String MSG_TYPE = "type";
     public static final Map<String, String[]> TYPE_FIELDS = ImmutableMap.of(MsgTypes.INIT, InitMsg.ALL_FIELDS, MsgTypes.INITRESP, InitRespMsg.ALL_FIELDS, MsgTypes.DELIVER, DeliverMsg.ALL_FIELDS, MsgTypes.ROUTE, RouteMsg.ALL_FIELDS, MsgTypes.ERROR, ErrorMsg.ALL_FIELDS);
 
+    /**
+     * Parse a web socket string message and create a JSON Object and validate it against
+     * the set of fields it should have for its given type
+     *
+     * @param message JSON string containing the message
+     * @return the JSONObject with a validate message or null if validation failed
+     */
     public static JSONObject parse(String message){
 
         try {
@@ -58,6 +68,11 @@ public class WSMessages {
             return null;
         }
     }
+
+    /**
+     * Create an INIT message for requesting an ephemeral address from the web socket server
+     * @return JSONObject containing the message
+     */
     public static JSONObject createInitMsg(){
         try {
             JSONObject msg = new JSONObject();
@@ -67,6 +82,14 @@ public class WSMessages {
             return new JSONObject();
         }
     }
+
+    /**
+     * Create a routing message to be send to the WSS, containing the target address and the
+     * message contents
+     * @param adr address of the target
+     * @param content message data to be sent
+     * @return constructed JSONObject to be sent
+     */
     public static JSONObject createRoute(String adr, JSONObject content){
         try {
             JSONObject msg = new JSONObject();
@@ -79,6 +102,14 @@ public class WSMessages {
         }
     }
 
+    /**
+     * Validates a JSONObject against a String array of fields, this checks both that the
+     * provided msg contains all the fields in the array and that it does not contain any fields
+     * other than those defined in the array
+     * @param msg message to be validated
+     * @param fields list of strings to check
+     * @return true if valid, false it not
+     */
     private static boolean validate(JSONObject msg, String[] fields){
         if(fields ==null){
             return false;
@@ -100,7 +131,9 @@ public class WSMessages {
     }
 
 
-
+    /**
+     * Defines the different web socket message types
+     */
     public static final class MsgTypes {
 
         public static final String INIT = "INIT";
@@ -116,6 +149,9 @@ public class WSMessages {
 
     }
 
+    /**
+     * Defines fields in an Init Message
+     */
     public static final class InitMsg {
 
         public static final String[] ALL_FIELDS = new String[]{MSG_TYPE};
@@ -125,6 +161,9 @@ public class WSMessages {
         }
     }
 
+    /**
+     * Defines the fields in an Init Response message
+     */
     public static final class InitRespMsg {
 
         public static final String ADR = "EpheWssAddr";
@@ -134,6 +173,9 @@ public class WSMessages {
         }
     }
 
+    /**
+     * Defines the fields in a ROUTE message
+     */
     public static final class RouteMsg {
 
         public static final String ADR = "EpheWssAddr";
@@ -144,6 +186,9 @@ public class WSMessages {
         }
     }
 
+    /**
+     * Defines the fields in a DELIVER message
+     */
     public static final class DeliverMsg {
 
         public static final String MSG = "msg";
@@ -153,6 +198,9 @@ public class WSMessages {
         }
     }
 
+    /**
+     * Defines the fields in an error message
+     */
     public static final class ErrorMsg {
 
         public static final String CODE = "errCode";

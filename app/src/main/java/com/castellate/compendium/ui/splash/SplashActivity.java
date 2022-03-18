@@ -37,6 +37,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.castellate.compendium.MainActivity;
 import com.castellate.compendium.R;
 
+/**
+ * Splash activity shown when the app is started
+ *
+ * TODO change how long this shows for based on when the app was last opened, i.e. don't pester the user with the splash screen on reopening
+ */
 public class SplashActivity extends AppCompatActivity {
     private View[][] fadeOrder;
     @Override
@@ -44,9 +49,6 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         setContentView(R.layout.activity_splash);
-        //TransitionInflater inflater = TransitionInflater.from(SplashActivity.this);
-
-        //this.getWindow().setExitTransition(new Fade());
         IntentAction loadApp = new IntentAction(this, SplashActivity.this, MainActivity.class,1000);
 
         FadeAction faCastellate = new FadeAction();
@@ -65,7 +67,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 faSccs.processAction();;
-                //faSccs.processAction();
+
             }
         }, 150);
 

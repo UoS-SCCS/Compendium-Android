@@ -54,6 +54,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
+/**
+ * Push server manager that manages interactions with the push server, like registering the
+ * devices ID.
+ *
+ * This might expand in time to also register public key of approved senders
+ */
 public class PushServerManager {
     private static final String TAG = "PushServerManager";
     private static final String REQ_FIREBASE_ID="fb_id";
@@ -62,6 +68,17 @@ public class PushServerManager {
     public PushServerManager() {
     }
 
+    /**
+     * Checks if we are registered by checking the preferences file. This should be all that is
+     * required because any change in ID will trigger the notification service and call an update.
+     * However, this does not handle the situation of the resetting of the PushServer and loss of
+     * the ID map. That shouldn't happen often but does happen during development. As such, at the
+     * moment this always sends its token to the PushServer on start.
+     *
+     * TODO remove forced update call to PushServer once stable. Consider alternative way of checking push server is up-to-date
+     *
+     * @param context
+     */
     public static void checkRegistered(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(Prefs.APP_SETTINGS, Context.MODE_PRIVATE);
         boolean registered = prefs.getBoolean("registered", false);
@@ -73,6 +90,10 @@ public class PushServerManager {
 
     }
 
+    /**
+     * Request the firebase ID token, then when it is received send it to the PushServer
+     * @param context context to make the request in
+     */
     private static void getFirebaseToken(Context context) {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
@@ -91,6 +112,13 @@ public class PushServerManager {
         });
     }
 
+    /**
+     * Performs the actual sending operation using Volley to construct and send a request.
+     * @param token firebase ID
+     * @param context context to run in
+     * @throws CryptoException
+     * @throws StorageException
+     */
     public static void sendTokenToServer(String token, Context context) throws CryptoException, StorageException {
         // creating a new variable for our request queue
         try {
