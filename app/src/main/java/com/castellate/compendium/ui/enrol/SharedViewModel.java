@@ -32,14 +32,25 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+/**
+ * Shared view model for sharing data between fragments, in this case the detected QRCode
+ */
 public class SharedViewModel  extends ViewModel {
     private final MutableLiveData<String> receivedMessage = new MutableLiveData<String>();
 
+    /**
+     * Sets the message (QRCode string)
+     * @param msg message (QRCode) to share
+     */
     public void setMessage(String msg){
         Log.d("VIEW MODEL", msg);
         receivedMessage.setValue(msg);
     }
 
+    /**
+     * Gets the shared message (QRCode)
+     * @return string containing the QRCode
+     */
     public MutableLiveData<String> getMessage() {
         return receivedMessage;
     }

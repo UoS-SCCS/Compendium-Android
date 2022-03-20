@@ -34,14 +34,25 @@ import androidx.lifecycle.ViewModel;
 
 import org.json.JSONObject;
 
+/**
+ * View model for sharing data between fragments
+ */
 public class PushRequestSharedViewModel extends ViewModel {
     private final MutableLiveData<JSONObject> receivedMessage = new MutableLiveData<>();
 
+    /**
+     * Set the received message to be shared
+     * @param msg JSON message to be shared
+     */
     public void setMessage(JSONObject msg){
         Log.d("VIEW MODEL", msg.toString());
         receivedMessage.setValue(msg);
     }
 
+    /**
+     * Get the shared message
+     * @return JSONObject of shared message
+     */
     public MutableLiveData<JSONObject> getMessage() {
         return receivedMessage;
     }

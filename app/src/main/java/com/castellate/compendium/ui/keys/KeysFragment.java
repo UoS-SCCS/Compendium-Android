@@ -51,15 +51,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing a list of keys, specifically KeyItems
  */
 public class KeysFragment extends Fragment implements KeyItemClickedListener{
     private static final String TAG = "KeysFragment";
 
 
     /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
+     * Construct new KeysFragment
      */
     public KeysFragment() {
     }

@@ -27,6 +27,13 @@
 
 package com.castellate.compendium.ui.apps;
 
+/**
+ * Interface for listeners of AppItem click events
+ */
 public interface AppItemClickedListener {
+    /**
+     * AppItem clicked
+     * @param item AppItem that was clicked
+     */
     void itemClicked(AppItem item);
 }

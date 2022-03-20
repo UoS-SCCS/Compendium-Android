@@ -69,7 +69,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Fragment to show a camera to use for detecting the QRCode
  */
 public class QRCodeFragment extends Fragment {
     private PreviewView previewView;
@@ -78,6 +78,10 @@ public class QRCodeFragment extends Fragment {
 
     private static final String TAG = "QRCodeFragment";
     private SharedViewModel sharedModel;
+
+    /**
+     * Create a new QRCodeFragment
+     */
     public QRCodeFragment() {
         // Required empty public constructor
     }
@@ -112,11 +116,15 @@ public class QRCodeFragment extends Fragment {
         }, ContextCompat.getMainExecutor(requireContext()));
         return view;
     }
+
+    /**
+     * Called when a QRCode is detected, this will check if it is of the correct structure and
+     * if so stop the camera and move to enrolment, otherwise it ignores it.
+     * @param imageProxy image proxy used to process the captured frames
+     * @param barcodes the list of barcodes that have been found
+     */
     private void processBarcode(ImageProxy imageProxy,List<Barcode> barcodes){
 
-        // Task completed successfully
-        // [START_EXCLUDE]
-        // [START get_barcodes]
         for (Barcode barcode : barcodes) {
             Rect bounds = barcode.getBoundingBox();
             Point[] corners = barcode.getCornerPoints();
@@ -141,11 +149,12 @@ public class QRCodeFragment extends Fragment {
 
 
         }
-
-        // [END get_barcodes]
-        // [END_EXCLUDE]
         imageProxy.close();
     }
+
+    /**
+     * Vibrate the device to indicate that a QRCode has been found to provide haptic feedback
+     */
     private void vibrate(){
         // this type of vibration requires API 29
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
@@ -157,6 +166,11 @@ public class QRCodeFragment extends Fragment {
             vibrator.vibrate(vEffect);
         }
     }
+
+    /**
+     * Bind the image analysis to the camera provider
+     * @param cameraProvider Camera provider to bind to
+     */
     private void bindImageAnalysis(@NonNull ProcessCameraProvider cameraProvider) {
         ImageAnalysis imageAnalysis =
                 new ImageAnalysis.Builder().setTargetResolution(new Size(1280, 720))

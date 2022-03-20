@@ -41,16 +41,25 @@ import com.castellate.compendium.databinding.FragmentAppsItemBinding;
 
 import java.util.List;
 
-
+/**
+ * Recycler view for Apps list
+ */
 public class AppsListRecyclerViewAdapter extends RecyclerView.Adapter<AppsListRecyclerViewAdapter.ViewHolder> {
 
-    private final List<AppItem> mValues;
     private static final String TAG = "AppsListRecyclerViewAdapter";
+    private final List<AppItem> mValues;
     private AppItemClickedListener listener;
-private int selectColor;
+    private int selectColor;
+
+    /**
+     * Create new Apps List Recycler view
+     * @param items list of AppItems to show
+     * @param listener listener for click events
+     * @param selectColor background colour to set when item is selected
+     */
     public AppsListRecyclerViewAdapter(List<AppItem> items, AppItemClickedListener listener, int selectColor) {
         mValues = items;
-        this.listener=listener;
+        this.listener = listener;
         this.selectColor = selectColor;
     }
 
@@ -70,7 +79,7 @@ private int selectColor;
         holder.mImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(listener!=null){
+                if (listener != null) {
                     listener.itemClicked(holder.mItem);
                 }
                 // Here You Do Your Click Magic
@@ -83,12 +92,19 @@ private int selectColor;
         return mValues.size();
     }
 
+    /**
+     * inner ViewHolder to render AppItem
+     */
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView mContentView;
         public final ImageButton mImageButton;
         private final LinearLayout mLayout;
         public AppItem mItem;
 
+        /**
+         * Create new AppItem ViewHolder
+         * @param binding FragmentAppsItemBinding
+         */
         public ViewHolder(FragmentAppsItemBinding binding) {
             super(binding.getRoot());
             mContentView = binding.appContent;

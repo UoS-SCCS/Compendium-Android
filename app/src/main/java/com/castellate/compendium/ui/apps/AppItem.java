@@ -27,17 +27,36 @@
 
 package com.castellate.compendium.ui.apps;
 
+/**
+ * AppItem to hold data on registered apps
+ */
 public class AppItem {
     private String name;
     private String type;
+
+    /**
+     * Construct a new AppItem
+     * @param name app name
+     * @param type app type
+     */
     public AppItem(String name, String type){
         this.name= name;
         this.type=type;
 
     }
+
+    /**
+     * Get app name
+     * @return app name
+     */
     public String getName(){
         return this.name;
     }
+
+    /**
+     * Get app type
+     * @return app type
+     */
     public String getType(){
         return this.type;
     }

@@ -27,17 +27,36 @@
 
 package com.castellate.compendium.ui.keys;
 
+/**
+ * Represents a Key item in the recyclerview. Contains the name and keyId
+ */
 public class KeyItem {
     private String name;
     private String keyId;
+
+    /**
+     * Construct new Key Item
+     * @param name key name
+     * @param keyId key id
+     */
     public KeyItem(String name, String keyId){
         this.name= name;
         this.keyId=keyId;
 
     }
+
+    /**
+     * Get the key name
+     * @return key name
+     */
     public String getName(){
         return this.name;
     }
+
+    /**
+     * Get the key id
+     * @return key ID
+     */
     public String getKeyId(){
         return this.keyId;
     }

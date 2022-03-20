@@ -27,6 +27,13 @@
 
 package com.castellate.compendium.ui.keys;
 
+/**
+ * Interface for listeners of key item clicks
+ */
 public interface KeyItemClickedListener {
+    /**
+     * Fired when a key item is clicked
+     * @param item KeyItem that was clicked on
+     */
     void itemClicked(KeyItem item);
 }

@@ -55,7 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment that lists registered Apps
  */
 public class AppsFragment extends Fragment implements AppItemClickedListener {
     private static final String TAG = "AppsFragment";
@@ -63,8 +63,7 @@ public class AppsFragment extends Fragment implements AppItemClickedListener {
     private List<AppItem> data;
     private AppsListRecyclerViewAdapter adapter;
     /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
+     * Create a new Apps Fragment
      */
     public AppsFragment() {
     }

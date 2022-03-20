@@ -63,8 +63,7 @@ import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
 /**
- * A simple {@link Fragment} subclass.
-
+ * Complete Enrolment fragment shown after the QRCode has been scanned
  */
 public class CompleteEnrolment extends Fragment {
 
@@ -73,7 +72,11 @@ public class CompleteEnrolment extends Fragment {
 
     private int newDeviceIdx = 1;
     private CompanionDevice companionDevice;
-    private boolean inError =false;
+    private boolean inError = false;
+
+    /**
+     * Create a new CompleteEnrolment fragment
+     */
     public CompleteEnrolment() {
         // Required empty public constructor
 
@@ -96,9 +99,12 @@ public class CompleteEnrolment extends Fragment {
 
     }
 
-    //
+    /**
+     * Fade the specified view in over a period of 100ms
+     * @param view view to be faded in
+     */
     private void fadeIn(View view) {
-        if(view==null){
+        if (view == null) {
             return;
         }
         view.setAlpha(0f);
@@ -109,8 +115,13 @@ public class CompleteEnrolment extends Fragment {
         view.animate().alpha(1f).setDuration(100).setListener(null);
 
     }
+
+    /**
+     * Fade the specified view out over 100 ms
+     * @param view view to fade out
+     */
     private void fadeOut(View view) {
-        if(view==null){
+        if (view == null) {
             return;
         }
         //view.setAlpha(1f);
@@ -128,9 +139,14 @@ public class CompleteEnrolment extends Fragment {
 
     }
 
+    /**
+     * Cross fade two views, fading one out and the other in over 100ms
+     * @param fadeMeOut view to fade out
+     * @param fadeMeIn view to fade in
+     */
     private void crossFade(View fadeMeOut, View fadeMeIn) {
         fadeIn(fadeMeIn);
-        if(fadeMeOut!=null) {
+        if (fadeMeOut != null) {
             fadeMeOut.animate().alpha(0f).setDuration(100).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -142,46 +158,62 @@ public class CompleteEnrolment extends Fragment {
 
     }
 
+    /**
+     * Show an error message to indicate duplicate enrolment
+     */
     private void showDuplicateError() {
         showGenericError("This device has already enrolled with the PC");
     }
 
+    /**
+     * Show a generic error message
+     */
     private void showGenericError() {
         showGenericError(null);
 
     }
+
+    /**
+     * Shows a generic error message with the specified text message
+     * @param customText error message to show
+     */
     private void showGenericError(String customText) {
-        if(inError){
+        if (inError) {
             return;
         }
-        companionDevice.setProtocolInError(102,customText);
+        companionDevice.setProtocolInError(102, customText);
         companionDevice.reset();
         View view = getView();
-        if(view==null){
-            Log.d(TAG,"Cannot display error because there is no view");
+        if (view == null) {
+            Log.d(TAG, "Cannot display error because there is no view");
             return;
         }
-        this.inError=true;
+        this.inError = true;
         crossFade(view.findViewById(R.id.network_progress), view.findViewById(R.id.failed));
         fadeOut(view.findViewById(R.id.cancel_enrolment));
         fadeOut(view.findViewById(R.id.confirm_button));
         fadeIn(view.findViewById(R.id.ok_error_button));
         fadeOut(view.findViewById(R.id.device_name));
         fadeOut(view.findViewById(R.id.device_label));
-        ((TextView)view.findViewById(R.id.title)).setText(R.string.error_title);
-        if(customText!=null) {
+        ((TextView) view.findViewById(R.id.title)).setText(R.string.error_title);
+        if (customText != null) {
             ((TextView) view.findViewById(R.id.explain)).setText(customText);
-        }else{
-            ((TextView)view.findViewById(R.id.explain)).setText(R.string.generic_enrol_error);
+        } else {
+            ((TextView) view.findViewById(R.id.explain)).setText(R.string.generic_enrol_error);
         }
 
     }
 
+    /**
+     * method to process the confirmation button being clicked. This updates the device counter
+     * to ensure devices are automatically given a new name and updates the view
+     * @param viewButton button that was clicked
+     */
     private void confirmClick(View viewButton) {
-        View view= getView();
-        SharedPreferences prefs =requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
+        View view = getView();
+        SharedPreferences prefs = requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
         EditText deviceName = (EditText) Objects.requireNonNull(view).findViewById(R.id.device_name);
-        if (deviceName!=null && deviceName.getText().toString().equals("Device_" + newDeviceIdx)) {
+        if (deviceName != null && deviceName.getText().toString().equals("Device_" + newDeviceIdx)) {
             SharedPreferences.Editor editor = prefs.edit();
             editor.putInt("deviceCounter", ++newDeviceIdx);
             editor.apply();
@@ -197,15 +229,20 @@ public class CompleteEnrolment extends Fragment {
 
     }
 
+    /**
+     * Cancel was clicked so send an error message by putting the protocol in the error state and
+     * adjust the UI accordingly
+     * @param viewButton cancel button that was clicked
+     */
     private void cancelClicked(View viewButton) {
-        View view= getView();
+        View view = getView();
 
         View confirmButton = Objects.requireNonNull(view).findViewById(R.id.confirm_button);
-        if(confirmButton !=null){
+        if (confirmButton != null) {
             confirmButton.setEnabled(false);
         }
         viewButton.setEnabled(false);
-        companionDevice.setProtocolInError(103,"Enrolment Rejected by User");
+        companionDevice.setProtocolInError(103, "Enrolment Rejected by User");
         companionDevice.reset();
         GifDrawable drawable = (GifDrawable) ((GifImageView) view.findViewById(R.id.failed)).getDrawable();
         drawable.addAnimationListener(loopNumber -> {
@@ -218,27 +255,43 @@ public class CompleteEnrolment extends Fragment {
 
     }
 
+    /**
+     * Process a state change to awaiting UI, if the state is INIT_WSS check the key doesn't
+     * already exist
+     * @param protocolState
+     * @throws StorageException
+     */
     private void processAwaitingUI(String protocolState) throws StorageException {
 
         if (protocolState.equals("INIT_WSS")) {
             IdentityStore identityStore = IdentityStore.getInstance();
             if (identityStore.hasPublicIdentity(companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY))) {
                 showDuplicateError();
-                companionDevice.setProtocolInError(101,"Duplicate Enrolment Attempt");
+                companionDevice.setProtocolInError(101, "Duplicate Enrolment Attempt");
 
             }
         }
     }
 
+    /**
+     * Updates the progress bar after a status change by querying the progress value from
+     * the current protocol
+     * @param protocolStatus current status of the protocol
+     */
     private void updateProgress(Protocol.STATUS protocolStatus) {
-        View view= getView();
+        View view = getView();
         if (protocolStatus != Protocol.STATUS.IDLE) {
             ((CircularProgressIndicator) Objects.requireNonNull(view).findViewById(R.id.progress_spinner)).setProgress(companionDevice.getProgress(), true);
         }
     }
 
+    /**
+     * Called when the protocol is finished. Updates the UI resets the CompanionDevice object so it
+     * is ready to receive new requests and navigates back to the home screen
+     * @throws StorageException
+     */
     private void protocolFinished() throws StorageException {
-        View view= getView();
+        View view = getView();
         Log.d(TAG, "Protocol finished will write out data");
         IdentityStore identityStore = IdentityStore.getInstance();
         String deviceNameStr = ((EditText) Objects.requireNonNull(view).findViewById(R.id.device_name)).getText().toString();
@@ -259,6 +312,11 @@ public class CompleteEnrolment extends Fragment {
 
     }
 
+    /**
+     * Called when a protocol status update is received via the view model
+     * @param status updated protocol status
+     * @throws StorageException
+     */
     private void protocolStatusUpdate(Protocol.STATUS status) throws StorageException {
 
 
@@ -289,7 +347,7 @@ public class CompleteEnrolment extends Fragment {
             try {
                 protocolStatusUpdate(status);
             } catch (StorageException e) {
-                Log.d(TAG,"StorageException",e);
+                Log.d(TAG, "StorageException", e);
                 showGenericError();
             }
         });
@@ -304,6 +362,12 @@ public class CompleteEnrolment extends Fragment {
         return view;
     }
 
+    /**
+     * Handle the receipt of a QRCode update from the view model, this triggers the start
+     * of the enrol protoocl
+     * @param item
+     * @param completeEnrolModel
+     */
     private void handleQRCode(String item, ProtocolViewModel completeEnrolModel) {
         Log.d(TAG, "QRCode received, starting Enrol Protocol");
         EnrolProtocol enrolProtocol = new EnrolProtocol();

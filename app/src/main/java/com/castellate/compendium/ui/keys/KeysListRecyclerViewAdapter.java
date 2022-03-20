@@ -40,16 +40,25 @@ import com.castellate.compendium.databinding.FragmentKeysItemBinding;
 
 import java.util.List;
 
-
+/**
+ * Keys List Recycler adapter for showing and managing KeyItems list
+ */
 public class KeysListRecyclerViewAdapter extends RecyclerView.Adapter<KeysListRecyclerViewAdapter.ViewHolder> {
 
-    private final List<KeyItem> mValues;
     private static final String TAG = "KeysListRecyclerViewAdapter";
+    private final List<KeyItem> mValues;
     private KeyItemClickedListener listener;
-private int selectColor;
+    private int selectColor;
+
+    /**
+     * Create a new KeysListRecyclerViewAdapter
+     * @param items list of KeyItmes to be shown
+     * @param listener listener for click events on key items
+     * @param selectColor colour to change background to when item is selected
+     */
     public KeysListRecyclerViewAdapter(List<KeyItem> items, KeyItemClickedListener listener, int selectColor) {
         mValues = items;
-        this.listener=listener;
+        this.listener = listener;
         this.selectColor = selectColor;
     }
 
@@ -69,8 +78,8 @@ private int selectColor;
         holder.mLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(listener!=null){
-                    ((LinearLayout)holder.mContentView.getParent()).setBackgroundColor(selectColor);
+                if (listener != null) {
+                    ((LinearLayout) holder.mContentView.getParent()).setBackgroundColor(selectColor);
                     listener.itemClicked(holder.mItem);
                 }
                 // Here You Do Your Click Magic
@@ -83,11 +92,18 @@ private int selectColor;
         return mValues.size();
     }
 
+    /**
+     * Inner class to represent the ViewHolder to correctly format the key item
+     */
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView mContentView;
         private final LinearLayout mLayout;
         public KeyItem mItem;
 
+        /**
+         * Create a new KeyItem ViewHolder
+         * @param binding FragmentKeysItemBinding
+         */
         public ViewHolder(FragmentKeysItemBinding binding) {
             super(binding.getRoot());
             mContentView = binding.keysContent;

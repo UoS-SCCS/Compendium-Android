@@ -42,6 +42,9 @@ import androidx.transition.Slide;
 import com.castellate.compendium.R;
 import com.castellate.compendium.databinding.HomeScreenBinding;
 
+/**
+ * Home screen fragment that represents the main screen on the Activity
+ */
 public class HomeScreen extends Fragment {
 
     private HomeScreenBinding binding;
@@ -64,6 +67,11 @@ public class HomeScreen extends Fragment {
 
     }
 
+    /**
+     * Attach button events
+     * @param view current view
+     * @param savedInstanceState Bundle
+     */
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 

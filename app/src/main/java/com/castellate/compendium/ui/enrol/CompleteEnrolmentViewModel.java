@@ -33,25 +33,61 @@ import androidx.lifecycle.ViewModel;
 import com.castellate.compendium.protocol.Protocol;
 import com.castellate.compendium.protocol.ProtocolViewModel;
 
+/**
+ * View model to exchange information between fragments and the enrol protocol. This allows
+ * updates to be pushed from the Protocol during background processing
+ */
 public class CompleteEnrolmentViewModel extends ViewModel implements ProtocolViewModel {
+
     private final MutableLiveData<Protocol.STATUS> protocolStatus = new MutableLiveData<>();
     private final MutableLiveData<String> protocolState = new MutableLiveData<>();
 
+    /**
+     * Update protocol status
+     * @param status new protocol status
+     */
     public void setProtocolStatus(Protocol.STATUS status){
         protocolStatus.setValue(status);
     }
+
+    /**
+     * Get current protocol status
+     * @return protocol status
+     */
     public MutableLiveData<Protocol.STATUS> getProtocolStatus() {
         return protocolStatus;
     }
+
+    /**
+     * Called from a separate thread to update the protocol status
+     * setProtocolStatus should not be called from a different thread, otherwise it could
+     * cause exception
+     * @param status new status
+     */
     public void postProtocolStatus(Protocol.STATUS status){
         protocolStatus.postValue(status);
     }
+
+    /**
+     * Sets the protocol state
+     * @param state new protocol state
+     */
     public void setProtocolState(String state){
         protocolState.setValue(state);
     }
+
+    /**
+     * Post an updated protocol state from a different thread
+     * @param state new protocol state
+     */
     public void postProtocolState(String state){
         protocolState.postValue(state);
     }
+
+    /**
+     * Get the current protocol state
+     * @return protocol state
+     */
     public MutableLiveData<String> getProtocolState() {
         return protocolState;
     }
