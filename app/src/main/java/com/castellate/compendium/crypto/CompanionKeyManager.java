@@ -57,6 +57,10 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
+/**
+ * Key Manager for the companion device. Handles access to the keys in the AndroidKeyStore and
+ * the storing of public keys received from PCs
+ */
 public class CompanionKeyManager {
     private static final String identityKey = "CompanionDeviceIdentity";
     private static final String CURVE = "secp256r1";
@@ -67,6 +71,10 @@ public class CompanionKeyManager {
     private static final String SIGNATURE_ALG="SHA256withECDSA";
     private final KeyStore keystore;
 
+    /**
+     * Create a new Companion Key Manager
+     * @throws CryptoException
+     */
     public CompanionKeyManager() throws CryptoException {
 
         try {
@@ -77,6 +85,14 @@ public class CompanionKeyManager {
         }
     }
 
+    /**
+     * Gets or create the identity key  for this device. This key pair is stored in the
+     * AndroidKeyStore but is not protected by a biometric. This is to allow communications
+     * to be established without a biometric check
+     *
+     * @return Generated or retrieved KeyPair
+     * @throws CryptoException
+     */
     public synchronized KeyPair getOrCreateIdentityKey() throws CryptoException{
         try {
             if (keystore.containsAlias(identityKey)) {
@@ -94,11 +110,26 @@ public class CompanionKeyManager {
         }
     }
 
+    /**
+     * Get a signing key used for user verification, creating it if it doesn't exist
+     * @param keyId ID of the key
+     * @return Created or retrieved Public Key
+     * @throws CryptoException
+     */
     public PublicKey getPublicSigningKey(String keyId) throws CryptoException {
         KeyPair key = getOrCreateSigningKeyPair(keyId);
         return key.getPublic();
     }
 
+    /**
+     * Gets a signature object with the specified Key ID. This is the needed because the
+     * Key is protected by biometric authentication, so direct access is not permitted. Instead
+     * a Signature object has to be created and then passed to the biometric prompt to be able
+     * to undertake the signing operation
+     * @param keyId ID of the key
+     * @return Initialised Signature object for Signing with specified key
+     * @throws CryptoException
+     */
     public Signature getSignatureObject(String keyId) throws CryptoException {
         try {
             KeyPair kp = getOrCreateSigningKeyPair(keyId);
@@ -110,6 +141,15 @@ public class CompanionKeyManager {
         }
     }
 
+    /**
+     * Gets a Cipher object for encryption with the specified Key ID. This is the needed because the
+     * Key is protected by biometric authentication, so direct access is not permitted. Instead
+     * a Cipher object has to be created and then passed to the biometric prompt to be able
+     * to undertake the signing operation.
+     * @param keyId ID of the key
+     * @return Initialised Cipher object with the key ready for encryption
+     * @throws CryptoException
+     */
     public Cipher getEncryptionCipher(String keyId) throws CryptoException {
         try {
             SecretKey key = getOrCreateSecretKey(keyId);
@@ -122,6 +162,16 @@ public class CompanionKeyManager {
 
     }
 
+    /**
+     * Gets a Cipher object for decryption with the specified Key ID. This is the needed because the
+     * Key is protected by biometric authentication, so direct access is not permitted. Instead
+     * a Cipher object has to be created and then passed to the biometric prompt to be able
+     * to undertake the signing operation.
+     * @param keyId ID of the key
+     * @param iv IV used during encryption
+     * @return Initialised Cipher object with the key ready for decryption
+     * @throws CryptoException
+     */
     public Cipher getDecryptionCipher(String keyId, byte[] iv) throws CryptoException {
         try {
             SecretKey key = getOrCreateSecretKey(keyId);
@@ -134,6 +184,12 @@ public class CompanionKeyManager {
 
     }
 
+    /**
+     * Gets or creates a biometrically protected signing key with the specified key ID
+     * @param keyId unique ID of the key
+     * @return KeyPair of retrieved or created key pair
+     * @throws CryptoException
+     */
     private KeyPair getOrCreateSigningKeyPair(String keyId) throws CryptoException {
         //TODO handle someone request an incorrect key
         try {
@@ -152,6 +208,12 @@ public class CompanionKeyManager {
     }
 
 
+    /**
+     * Get a list of all the key IDs, note this retrieves all Key IDs in the AndroidKeyStore
+     * including the identity key
+     * @return List of keyID strings
+     * @throws CryptoException
+     */
     public List<String> getKeyList() throws CryptoException {
         List<String> list = new ArrayList<>();
 
@@ -166,6 +228,13 @@ public class CompanionKeyManager {
         }
         return list;
     }
+
+    /**
+     * Checks if the specified KeyId is new by checking if it currently exists in the keystore
+     * @param keyId key ID to check
+     * @return true if the key is new, false if not
+     * @throws CryptoException
+     */
     public boolean isNewKey(String keyId)throws CryptoException{
         try {
             return !keystore.containsAlias(keyId);
@@ -173,6 +242,13 @@ public class CompanionKeyManager {
             throw new CryptoException("Exception checking if key exists",e);
         }
     }
+
+    /**
+     * Gets or creates a new symmetric key protected by a biometric
+     * @param keyId Key ID
+     * @return Created or retrieved SecretKey
+     * @throws CryptoException
+     */
     private SecretKey getOrCreateSecretKey(String keyId) throws CryptoException {
         try {
             if (keystore.containsAlias(keyId)) {
@@ -187,6 +263,11 @@ public class CompanionKeyManager {
         }
     }
 
+    /**
+     * Deletes the specified key from the KeyStore
+     * @param keyId Key ID to delete
+     * @throws CryptoException
+     */
     public void deleteKey(String keyId) throws CryptoException{
         try {
             keystore.deleteEntry(keyId);
@@ -194,10 +275,20 @@ public class CompanionKeyManager {
             throw new CryptoException("Exception cleaning up unused key",e);
         }
     }
+
+    /**
+     * Deletes a key that may have been optimistically created during registration
+     * @param keyId ID of the key to be removed
+     * @throws CryptoException
+     */
     public void cleanUpUnusedKey(String keyId) throws CryptoException{
         deleteKey(keyId);
     }
 
+    /**
+     * Reset the keystore by deleting all entries, including the identity key
+     * @throws CryptoException
+     */
     public void reset() throws CryptoException{
         try {
             Enumeration<String> en = keystore.aliases();

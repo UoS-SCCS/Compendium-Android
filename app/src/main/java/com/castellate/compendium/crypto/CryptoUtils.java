@@ -43,6 +43,9 @@ import java.security.spec.X509EncodedKeySpec;
 import javax.crypto.KeyAgreement;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * Crypto Utils for common operations
+ */
 public class CryptoUtils {
     private static final String PEM_HEAD = "-----BEGIN PUBLIC KEY-----";
     private static final String PEM_TAIL = "-----END PUBLIC KEY-----";
@@ -50,6 +53,14 @@ public class CryptoUtils {
     private static final String KEY_ALG="ECDH";
     private static final byte[] HKDF_INFO="STS Handshake data".getBytes(StandardCharsets.UTF_8);
     private static final int HKDF_KEY_SIZE=32;
+
+    /**
+     * Get Public Key identifier from a Public Key String, first loading the public key and then
+     * calculating the SHA256 of the public key bytes
+     * @param publicKeyString public key to calculate ID for
+     * @return String of hex encoded public key ID bytes
+     * @throws CryptoException
+     */
     public static String getPublicKeyId(String publicKeyString) throws CryptoException {
         PublicKey publicKey = CryptoUtils.getPublicKey(publicKeyString);
         MessageDigest digest;
@@ -61,6 +72,13 @@ public class CryptoUtils {
         digest.update(publicKey.getEncoded());
         return convertToHex(digest.digest());
     }
+
+    /**
+     * Get the public Key ID from the specified key
+     * @param publicKey Public Key to calculate ID for
+     * @return Hex encoded public key bytes
+     * @throws CryptoException
+     */
     public static String getPublicKeyId(PublicKey publicKey) throws CryptoException {
         MessageDigest digest;
         try {
@@ -72,6 +90,11 @@ public class CryptoUtils {
         return convertToHex(digest.digest());
     }
 
+    /**
+     * Convert bytes to hex
+     * @param bytes bytes to be converted
+     * @return hex string of bytes
+     */
     public static String convertToHex(byte[] bytes){
         StringBuilder buffer = new StringBuilder();
         for (byte aByte : bytes) {
@@ -80,6 +103,14 @@ public class CryptoUtils {
         }
         return buffer.toString();
     }
+
+    /**
+     * Load a string represetation of a public key into a ECPublicKey. This supports both
+     * PEM and DER Base64 encoded string
+     * @param encodedKey Base64 encoded public key
+     * @return ECPublicKey object
+     * @throws CryptoException
+     */
     public static ECPublicKey getPublicKey(String encodedKey) throws CryptoException {
         if(encodedKey==null){
             throw new CryptoException("Encoded key is null");
@@ -98,12 +129,29 @@ public class CryptoUtils {
         }
     }
 
+    /**
+     * Encoded a Public key to a Base64 String
+     * @param publicKey public key to be encoded
+     * @return Base64 encoding of the public key
+     */
     public static String encodePublicKey(PublicKey publicKey) {
         return B64.encode(publicKey.getEncoded());
     }
+
+    /**
+     * Loads a SecretKey from a Base64 encoding
+     * @param base64EncodedKey Base64 encoded secret key
+     * @return SecretKey
+     */
     public static SecretKeySpec getSecretKey(String base64EncodedKey){
         return new SecretKeySpec(B64.decode(base64EncodedKey), "AES");
     }
+
+    /**
+     * Generate an ephemeral EC Key Pair
+     * @return KeyPair
+     * @throws CryptoException
+     */
     public static KeyPair generateEphemeralKeys() throws CryptoException {
         try {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
@@ -114,6 +162,13 @@ public class CryptoUtils {
         }
     }
 
+    /**
+     * Perform the ECDH and generate a shared secret
+     * @param kp Key Pair of this device
+     * @param otherPartyPublicKey Key Pair of other device
+     * @return bytes containing shared secret
+     * @throws CryptoException
+     */
     public static byte[] performECDH(KeyPair kp, PublicKey otherPartyPublicKey) throws CryptoException {
         try {
             KeyAgreement ka = KeyAgreement.getInstance(KEY_ALG);
@@ -124,6 +179,13 @@ public class CryptoUtils {
             throw new CryptoException("Exception performing ECDH", e);
         }
     }
+
+    /**
+     * Derive and AES key from the shared secret use an HMACSHA256 based HKDF
+     * @param sharedSecret bytes of shared secret from DH
+     * @return derived key as Base64 encoded value
+     * @throws CryptoException
+     */
     public static String deriveKey(byte[] sharedSecret) throws CryptoException{
         try {
             byte[] derived = HMACSHA256Hkdf.computeHkdf(sharedSecret, null, HKDF_INFO, HKDF_KEY_SIZE);

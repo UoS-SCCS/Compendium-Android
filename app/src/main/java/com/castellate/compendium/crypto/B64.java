@@ -30,11 +30,24 @@ package com.castellate.compendium.crypto;
 
 import android.util.Base64;
 
+/**
+ * Base64 Utility class to ensure consistent encoding
+ */
 public class B64 {
+    /**
+     * Decode Base64 string to bytes
+     * @param value Base64 string to decode
+     * @return bytes of Base64 string
+     */
     public static byte[] decode(String value) {
         return Base64.decode(value, Base64.NO_WRAP);
     }
 
+    /**
+     * Encoded the bytes as Base64 with no wrap
+     * @param value bytes to encode
+     * @return Base64 encoded string
+     */
     public static String encode(byte[] value) {
         return Base64.encodeToString(value, Base64.NO_WRAP);
     }
