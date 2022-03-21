@@ -63,9 +63,8 @@ public class KeysFragment extends Fragment implements KeyItemClickedListener{
     public KeysFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static KeysFragment newInstance(int columnCount) {
+    
+    public static KeysFragment newInstance() {
         KeysFragment fragment = new KeysFragment();
         return fragment;
     }

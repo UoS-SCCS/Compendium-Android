@@ -41,7 +41,7 @@ public class Constants {
     public static final String DERIVED_KEY = "derived_key";
     public static final String HASH_CD_PUBLIC_KEY = "hash_cd_public_key";
     public static final String HASH_PC_PUBLIC_KEY = "hash_pc_public_key";
-
+    public static final String APP_ID = "app_id";
 
     public static final String TYPE_PUT_GET = "PUT_GET";
     public static final String TYPE_REG_SIGN = "REG_SIGN";

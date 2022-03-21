@@ -48,6 +48,7 @@ import java.util.Properties;
  */
 public final class Config implements Initializer<Config> {
     public static final String WSS_REGISTER = "wss_register_url";
+    public static final String WSS_SERVER = "wss_url";
     private static final String TAG = "Config";
     private static final Config _instance = new Config();
     private final Properties properties = new Properties();

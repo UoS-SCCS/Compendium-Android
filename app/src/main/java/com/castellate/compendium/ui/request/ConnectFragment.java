@@ -340,11 +340,10 @@ public class ConnectFragment extends Fragment {
      * keystore and AppID are not globally unique, but they are unique within a Key, so we combine
      * the two to create a globally unique identifier
      *
-     * TODO externalise field name
      * @return concatenation of Public Key ID ":" and APP ID
      */
     private String getKeyId() {
-        return companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY) + ":" + companionDevice.getProtocolData("app_id");
+        return companionDevice.getProtocolData(Constants.HASH_PC_PUBLIC_KEY) + ":" + companionDevice.getProtocolData(Constants.APP_ID);
     }
 
     /**

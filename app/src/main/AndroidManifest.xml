@@ -33,7 +33,6 @@
             android:name=".ui.request.CompendiumRequestActivity"
             android:exported="false"
             android:label="@string/title_activity_compendium_request"
-            android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.Compendium.NoActionBar" /> <!-- [START fcm_default_icon] -->
         <!--
  Set custom default icon. This is used when no icon is set for incoming notification messages.

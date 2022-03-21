@@ -83,7 +83,7 @@ public class CompendiumFirebaseNotificationService extends FirebaseMessagingServ
         // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
         // [END_EXCLUDE]
 
-        // TODO(developer): Handle FCM messages here.
+
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
@@ -153,7 +153,6 @@ public class CompendiumFirebaseNotificationService extends FirebaseMessagingServ
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
-        // TODO: Implement this method to send token to your app server.
         try {
             PushServerManager.sendTokenToServer(token, getApplicationContext());
         } catch (CompendiumException e) {

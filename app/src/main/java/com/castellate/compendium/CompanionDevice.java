@@ -32,6 +32,8 @@ import static com.castellate.compendium.protocol.messages.Constants.ID_CD;
 
 import android.util.Log;
 
+import com.castellate.compendium.data.Config;
+import com.castellate.compendium.exceptions.StorageException;
 import com.castellate.compendium.protocol.Protocol;
 import com.castellate.compendium.protocol.ProtocolException;
 import com.castellate.compendium.protocol.ProtocolViewModel;
@@ -332,9 +334,8 @@ public class CompanionDevice {
     public void initWebSocketClient() {
         URI uri;
         try {
-            //TODO externalise this string to a config file
-            uri = new URI("wss://compendium.dev.castellate.com:8001");
-        } catch (URISyntaxException e) {
+            uri = new URI(Config.getInstance().get(Config.WSS_SERVER));
+        } catch (URISyntaxException | StorageException e) {
             Log.d(TAG, "WebSocketClient exception", e);
             if (this.currentProtocol != null) {
                 this.currentProtocol.setErrorStatus();

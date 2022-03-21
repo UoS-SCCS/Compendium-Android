@@ -68,9 +68,8 @@ public class AppsFragment extends Fragment implements AppItemClickedListener {
     public AppsFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static AppsFragment newInstance(int columnCount) {
+
+    public static AppsFragment newInstance() {
         AppsFragment fragment = new AppsFragment();
         return fragment;
     }
