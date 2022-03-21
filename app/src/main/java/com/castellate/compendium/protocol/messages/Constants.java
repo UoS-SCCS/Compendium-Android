@@ -27,6 +27,11 @@
 
 package com.castellate.compendium.protocol.messages;
 
+/**
+ * Constants used by protocols and classes references the protocols. Generally if the field
+ * is defined here it is used outside of just the message class, for example, by a class accessing
+ * the protocol data
+ */
 public class Constants {
     public static final String ADR_PC = "adr_pc";
     public static final String PC_PUBLIC_KEY = "pc_public_key";

@@ -34,8 +34,14 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
+/**
+ * Empty placeholder message, used when needing to put a placeholder message in a protocol
+ */
 public class EmptyProtocolMessage extends ProtocolMessage {
 
+    /**
+     * Construct an empty protocol message
+     */
     public EmptyProtocolMessage(){
         super();
     }
@@ -70,6 +76,9 @@ public class EmptyProtocolMessage extends ProtocolMessage {
         return false;
     }
 
+    /**
+     * Fields class defining fields used by this message type
+     */
     public static final class Fields {
 
         private Fields() {

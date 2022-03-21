@@ -27,6 +27,13 @@
 
 package com.castellate.compendium.protocol.messages;
 
+/**
+ * Interface that defines a message that should load fields in the message from protocol data
+ */
 public interface LoadProtocolData {
+    /**
+     * List of fields to load from protocol data into the message
+     * @return
+     */
     String[] getLoadFields();
 }

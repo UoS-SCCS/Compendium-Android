@@ -32,6 +32,9 @@ import com.castellate.compendium.protocol.messages.ProtocolMessage;
 
 import java.util.Map;
 
+/**
+ * Represents a protocol error message that includes an Encrypted error message
+ */
 public class ErrorProtocolMessage extends ProtocolMessage implements EmbeddedEncryptedMessage {
 
     public ErrorProtocolMessage(){

@@ -31,6 +31,10 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
+/**
+ * Abstract class that represents an Init Key Response Message. This is subclassed by both
+ * the enrolment and wss protocols.
+ */
 public abstract class  InitKeyRespProtocolMessage extends ProtocolMessage implements EmbeddedEncryptedMessage,LoadProtocolData {
 
     public InitKeyRespProtocolMessage(){
@@ -60,6 +64,10 @@ public abstract class  InitKeyRespProtocolMessage extends ProtocolMessage implem
     public String[] getLoadFields(){
         return Fields.LOAD_FIELDS;
     }
+
+    /**
+     * Fields class defining the fields used by this class
+     */
     public static final class Fields {
 
         private Fields() {

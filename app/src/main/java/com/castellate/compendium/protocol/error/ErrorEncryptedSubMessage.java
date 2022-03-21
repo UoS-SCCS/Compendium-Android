@@ -33,6 +33,9 @@ import com.castellate.compendium.protocol.messages.SignMessage;
 
 import java.util.Map;
 
+/**
+ * Represents an inner encrypted error message
+ */
 public class ErrorEncryptedSubMessage extends ProtocolMessage implements SignMessage, LoadProtocolData {
 
     public ErrorEncryptedSubMessage(){
@@ -66,6 +69,7 @@ public class ErrorEncryptedSubMessage extends ProtocolMessage implements SignMes
     public String[] getLoadFields() {
         return Fields.LOAD_FIELDS;
     }
+
 
     public static final class Fields {
 

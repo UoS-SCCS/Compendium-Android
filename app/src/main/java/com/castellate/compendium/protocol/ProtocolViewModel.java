@@ -29,10 +29,31 @@ package com.castellate.compendium.protocol;
 
 import androidx.lifecycle.MutableLiveData;
 
+/**
+ * Protocol View Model for sharing data between protocol and UI
+ */
 public interface ProtocolViewModel {
+    /**
+     * Post an updated status
+     * @param status update status
+     */
     void postProtocolStatus(Protocol.STATUS status);
+
+    /**
+     * Get the protocol status
+     * @return protocol status
+     */
     MutableLiveData<Protocol.STATUS> getProtocolStatus();
 
+    /**
+     * Post an updated protocol state
+     * @param state updated protocol state
+     */
     void postProtocolState(String state);
+
+    /**
+     * Get the protocol state
+     * @return protocol state
+     */
     MutableLiveData<String> getProtocolState();
 }

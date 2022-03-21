@@ -27,7 +27,19 @@
 
 package com.castellate.compendium.protocol.messages;
 
+/**
+ * Interface that is used to signify a message should be signed
+ */
 public interface SignMessage {
+    /**
+     * Get the field name to store the signature in
+     * @return
+     */
     String getSignatureField();
+
+    /**
+     * Get the list of string field names that should be added to the message digest
+     * @return array of string field names to add to message digest
+     */
     String[] getSignatureFields();
 }

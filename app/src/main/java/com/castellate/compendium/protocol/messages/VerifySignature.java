@@ -29,8 +29,27 @@ package com.castellate.compendium.protocol.messages;
 
 import java.util.Map;
 
+/**
+ * Signifies a message should have a signature verified
+ */
 public interface VerifySignature {
+    /**
+     * Get the signature
+     * @return Base64 encoded signature to veriy
+     */
     String getSignature();
+
+    /**
+     * String list of fields to add to the message digest
+     * @return array of string field names
+     */
     String[] getSignatureFields();
+
+    /**
+     * Get the public key to use for verification as Base64 encoded string
+     * @param protocolData map of name value pairs of protocol data
+     * @return Base64 string of the public key
+     * @throws ProtocolMessageException
+     */
     String getPublicKey(Map<String, String> protocolData) throws ProtocolMessageException;
 }

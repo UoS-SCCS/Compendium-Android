@@ -27,6 +27,13 @@
 
 package com.castellate.compendium.protocol.messages;
 
+/**
+ * Interface that defines a class that should have data stored into Protocol Data
+ */
 public interface StoreProtocolData {
+    /**
+     * Get a list of fields to store in protocol data
+     * @return Array of string field names to store
+     */
     String[] getStoreFields();
 }

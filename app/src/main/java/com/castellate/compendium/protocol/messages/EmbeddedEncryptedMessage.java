@@ -27,7 +27,19 @@
 
 package com.castellate.compendium.protocol.messages;
 
+/**
+ * Interface for messages that include an embedded encrypted message
+ */
 public interface EmbeddedEncryptedMessage {
+    /**
+     * Get field that contains embedded encrypted message
+     * @return field name
+     */
     String getEncryptedMsgField();
+
+    /**
+     * Get the class of the embedded encrypted message so it can be instantiated
+     * @return Class of the embedded encrypted message
+     */
     Class<?> getEncryptedMessageClass();
 }

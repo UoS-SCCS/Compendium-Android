@@ -29,6 +29,9 @@ package com.castellate.compendium.protocol.messages;
 
 import com.castellate.compendium.exceptions.CompendiumException;
 
+/**
+ * Exception thrown whilst processing a ProtocolMessage
+ */
 public class ProtocolMessageException extends CompendiumException {
     public ProtocolMessageException() {
     }

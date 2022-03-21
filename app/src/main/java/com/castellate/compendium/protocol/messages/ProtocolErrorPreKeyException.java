@@ -27,6 +27,9 @@
 
 package com.castellate.compendium.protocol.messages;
 
+/**
+ * Thrown for protocol errors that happen prior to a shared key being created
+ */
 public class ProtocolErrorPreKeyException extends Exception {
     public ProtocolErrorPreKeyException() {
     }
